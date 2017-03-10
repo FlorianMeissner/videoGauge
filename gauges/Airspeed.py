@@ -52,13 +52,14 @@ from PIL                    import Image
 import moviepy.editor       as mpy
 
 
-class Airspeed(BaseGauge.BaseGauge):
+class Airspeed(BaseGauge.AbstractBaseGauge):
 
 
     def __init__(self, points, unit, digSpeed=False, autorun=False, settings=None):
 
         # Base class constructor
-        BaseGauge.BaseGauge.__init__(self)
+        #~ BaseGauge.AbstractBaseGauge.__init__(self)
+        super(Airspeed, self).__init__()
 
         # Variables
         self.DigSpeed   =   digSpeed    # Show digital speed number in upper left corner.

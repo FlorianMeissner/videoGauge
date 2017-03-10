@@ -25,17 +25,19 @@
 
 # Creator:  Florian Meissner
 #           n1990b@gmx.de
-# Version:  0.1
-# Date:     2017/03/06
+# Version:  0.2
+# Date:     2017/03/10
 
 
 # VERSION HISTORY
 # ===============
 
-# 0.1:  Initial Beta
+# 0.1:  - Initial Beta
+# 0.2:  - Make class abstract
 
 
 ###################################################################################################
+
 
 # Own libraries
 from lib.calculations   import conversions, triangulation
@@ -43,12 +45,15 @@ from lib.myMisc         import basePath
 
 # Foreign libraries
 from PIL                import Image
+import abc
 import logging          as log
 import moviepy.editor   as mpy
 import os
 
 
-class BaseGauge(object):
+class AbstractBaseGauge(object):
+
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self):
 
@@ -156,14 +161,6 @@ class BaseGauge(object):
 
 
     # Get clip showing background color over the hole duration of the video.
-    """
-    def _create_background(self):
-        self.bgClip = mpy.ColorClip(
-                                    conversions.splitXY(self.Settings['format']),
-                                    col=self.bgcolor,
-                                    duration=self.cumDuration
-                                   )
-    """
     def _create_background(self):
         bgSize = int(triangulation.pythagoras(a=self.Size[0], b=self.Size[1]))
         self.BgClip = mpy.ColorClip(size=(bgSize, bgSize), col=self.BgColor, duration=self.Duration)
