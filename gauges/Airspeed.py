@@ -39,7 +39,7 @@
 
 
 # Gauge modules
-import airspeed
+#~ import airspeed
 import BaseGauge
 
 # Own library modules
@@ -54,12 +54,14 @@ import moviepy.editor       as mpy
 
 class Airspeed(BaseGauge.AbstractBaseGauge):
 
-
     def __init__(self, points, unit, digSpeed=False, autorun=False, settings=None):
 
+        # Variables used in base class, too.
+        self._Unit = unit.lower()
+        self._Child = self.__class__.__name__
+
         # Base class constructor
-        #~ BaseGauge.AbstractBaseGauge.__init__(self)
-        super(Airspeed, self).__init__()
+        super(self.__class__, self).__init__()
 
         # Variables
         self.DigSpeed   =   digSpeed    # Show digital speed number in upper left corner.
@@ -68,7 +70,6 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
                                         # self.__convert().
 
         # Initializing methods
-        self.__parse_unit(unit)
         self.__parse_speeds(points)
 
 
@@ -79,46 +80,35 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
             self.save(clip, "output.mp4")
 
 
-    def __parse_unit(self, unit):
-
-        unit = unit.lower()
-        self.Unit = unit
-
-        # Set pathes for graphics
-        prefix = self.BASEPATH + "airspeed/" + unit + "_"
-        self.setNeedle(prefix + "needle2.png")
-        self.setFaceplate(prefix + "faceplate.png")
-
-        # Get calibration table.
-        # self.calibrator will hold the imported module named like the passed unit.
-        self.calibrator = getattr(airspeed, unit)
-
-
     # ---------------------------------------------------------------------------------------------
     # - Needle                                                                                    -
     # ---------------------------------------------------------------------------------------------
 
 
-    # Calibrate given speed to turning angle of needle.
-    # Convert speed from native GPX m/s to indicators MPH. Then convert into rotating angle for
-    # needle.
     def __convert_speed(self, speed):
+        """
+        Calibrate given speed to turning angle of needle.
+        Convert speed from native GPX m/s to indicators MPH. Then convert into rotating angle for
+        needle.
+        """
 
         # m/s to MPH
-        if self.Unit == "mph":
+        if self._Unit == "mph":
             speed = conversions.ms2mph(speed)
 
         # m/s to kt
-        elif self.Unit == "kt":
+        elif self._Unit == "kt":
             speed = conversions.ms2kt(speed)
 
         return speed
 
 
-    # Calibate scale of facceplate to MPH.
     def __calibration(self, speed):
+        """
+        Calibate scale of faceplate to MPH.
+        """
 
-        calibration = self.calibrator.calibration()
+        calibration = self._Gauge_script.calibration()
 
         # Get list of known speed values.
         knownSpeeds = list(calibration.keys())
@@ -160,7 +150,17 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
 
 
     def __parse_speeds(self, pts):
+        """
+        Work through list of given track points and filter speed and duration from them. Also
+        convert speeds into rotation angle for needle graphic.
+
+        lookahead() is used because it is mandetory to remember values from last run of the for
+        loop to get angle range to animate.
+        """
+
         for pt in lookahead(pts):
+
+            # Last value will be not tuple. Scip because it has no following point.
             if type(pt) is tuple:
                 duration  = pt[0]['length']
                 speedFrom = self.__convert_speed(pt[0]['speed'])
@@ -176,7 +176,7 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
                         'speed'     :   speedFrom
                     }
                 )
-        print(self.Speeds)
+        #~ print(self.Speeds)
 
 
     # ---------------------------------------------------------------------------------------------
@@ -184,8 +184,10 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
     # ---------------------------------------------------------------------------------------------
 
 
-    # In verbose mode show speeds digitally below airspeed indicator.
     def __show_speed(self):
+        """
+        In verbose mode show speeds digitally below airspeed indicator.
+        """
 
         # Only shw speeds in verbose mode.
         if self.DigSpeed:
@@ -211,8 +213,11 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
             self.speedClip = mpy.concatenate_videoclips(speedClips)
 
 
-    # Create final video clip.
     def make(self):
+        """
+        Create final video clip.
+        """
+
         # Create needles
         #self.__convert_speeds()
         self._rotate_needle(self.Speeds)
@@ -240,6 +245,9 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
 
 
     def save(self, clip, filename, settings=None):
+        """
+        Save cmpiled video to disk.
+        """
 
         if settings is None:
             settings = self.Settings
