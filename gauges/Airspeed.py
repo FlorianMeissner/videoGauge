@@ -39,7 +39,6 @@
 
 
 # Gauge modules
-#~ import airspeed
 import BaseGauge
 
 # Own library modules
@@ -81,137 +80,8 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
 
 
     # ---------------------------------------------------------------------------------------------
-    # - Needle                                                                                    -
+    # - Composition                                                                               -
     # ---------------------------------------------------------------------------------------------
-
-
-    def __convert_speed(self, speed):
-        """
-        Calibrate given speed to turning angle of needle.
-        Convert speed from native GPX m/s to indicators MPH. Then convert into rotating angle for
-        needle.
-        """
-
-        # m/s to MPH
-        if self._Unit == "mph":
-            speed = conversions.ms2mph(speed)
-
-        # m/s to kt
-        elif self._Unit == "kt":
-            speed = conversions.ms2kt(speed)
-
-        return speed
-
-
-    def __calibration(self, speed):
-        """
-        Calibate scale of faceplate to MPH.
-        """
-
-        calibration = self._Gauge_script.calibration()
-
-        # Get list of known speed values.
-        knownSpeeds = list(calibration.keys())
-        knownSpeeds.sort()
-
-        # Check if value is out of scale.
-        if speed > max(knownSpeeds):
-            speed = max(knownSpeeds)
-
-        # Check for known values and return in directly.
-        if speed in calibration:
-            return calibration[speed]
-
-        # If value is unknown, calculate intermittent one from linear equation between known neighbours
-        # of calibration table.
-        else:
-            # Get neighbours of requested value.
-            lowerNeighbour = 0
-            higherNeighbour = 0
-
-            for i in knownSpeeds:
-                if i < speed:
-                    lowerNeighbour = i
-                    continue
-                if i > speed:
-                    higherNeighbour = i
-                    break
-
-            # Get angle with linear equation.
-            angle = interpolation.linEqu2pt(lowerNeighbour,
-                                            calibration[lowerNeighbour],
-                                            higherNeighbour,
-                                            calibration[higherNeighbour],
-                                            speed)
-
-            # MoviePy uses positive values for counter-clockwise turns.
-            #~ return angle * -1
-            return angle
-
-
-    def __parse_speeds(self, pts):
-        """
-        Work through list of given track points and filter speed and duration from them. Also
-        convert speeds into rotation angle for needle graphic.
-
-        lookahead() is used because it is mandetory to remember values from last run of the for
-        loop to get angle range to animate.
-        """
-
-        for pt in lookahead(pts):
-
-            # Last value will be not tuple. Scip because it has no following point.
-            if type(pt) is tuple:
-                duration  = pt[0]['length']
-                speedFrom = self.__convert_speed(pt[0]['speed'])
-                angleFrom = self.__calibration(speedFrom)
-                speedTo   = self.__convert_speed(pt[1]['speed'])
-                angleTo   = self.__calibration(speedTo)
-
-                self.Speeds.append(
-                    {
-                        'angleFrom' :   angleFrom,
-                        'angleTo'   :   angleTo,
-                        'duration'  :   duration,
-                        'speed'     :   speedFrom
-                    }
-                )
-        #~ print(self.Speeds)
-
-
-    # ---------------------------------------------------------------------------------------------
-    # - Digital speeds                                                                            -
-    # ---------------------------------------------------------------------------------------------
-
-
-    def __show_speed(self):
-        """
-        In verbose mode show speeds digitally below airspeed indicator.
-        """
-
-        # Only shw speeds in verbose mode.
-        if self.DigSpeed:
-
-            # Iterate threw track points and grap speed and length.
-            speedClips = []
-            for trkPt in self.Speeds:
-                speed = "%2.1f" % trkPt['speed']
-                length = trkPt['duration']
-
-                # Create TextClip for each track point.
-                speedClips.append(mpy.TextClip( txt             =   speed,
-                                                color           =   "white",
-                                                bg_color        =   "transparent",
-                                                fontsize        =   30,
-                                                print_cmd       =   False,
-                                                tempfilename    =   "text" + speed + ".png",
-                                                remove_temp     =   True
-                                              ).set_duration(length)
-                                 )
-
-            # Merge track point text clips.
-            self.speedClip = mpy.concatenate_videoclips(speedClips)
-
 
     def make(self):
         """
@@ -258,6 +128,93 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
                              audio=settings['audio'],
                              threads=settings['ffmpeg_threads'],
                              preset=settings['ffmpeg_preset'])
+
+
+    # ---------------------------------------------------------------------------------------------
+    # - Digital speeds                                                                            -
+    # ---------------------------------------------------------------------------------------------
+
+
+    def __show_speed(self):
+        """
+        In verbose mode show speeds digitally below airspeed indicator.
+        """
+
+        # Only shw speeds in verbose mode.
+        if self.DigSpeed:
+
+            # Iterate threw track points and grap speed and length.
+            speedClips = []
+            for trkPt in self.Speeds:
+                speed = "%2.1f" % trkPt['speed']
+                length = trkPt['duration']
+
+                # Create TextClip for each track point.
+                speedClips.append(mpy.TextClip( txt             =   speed,
+                                                color           =   "white",
+                                                bg_color        =   "transparent",
+                                                fontsize        =   30,
+                                                print_cmd       =   False,
+                                                tempfilename    =   "text" + speed + ".png",
+                                                remove_temp     =   True
+                                              ).set_duration(length)
+                                 )
+
+            # Merge track point text clips.
+            self.speedClip = mpy.concatenate_videoclips(speedClips)
+
+
+    # ---------------------------------------------------------------------------------------------
+    # - Needle                                                                                    -
+    # ---------------------------------------------------------------------------------------------
+
+
+    def __convert_speed(self, speed):
+        """
+        Calibrate given speed to turning angle of needle.
+        Convert speed from native GPX m/s to indicators MPH. Then convert into rotating angle for
+        needle.
+        """
+
+        # m/s to MPH
+        if self._Unit == "mph":
+            speed = conversions.ms2mph(speed)
+
+        # m/s to kt
+        elif self._Unit == "kt":
+            speed = conversions.ms2kt(speed)
+
+        return speed
+
+
+    def __parse_speeds(self, pts):
+        """
+        Work through list of given track points and filter speed and duration from them. Also
+        convert speeds into rotation angle for needle graphic.
+
+        lookahead() is used because it is mandetory to remember values from last run of the for
+        loop to get angle range to animate.
+        """
+
+        for pt in lookahead(pts):
+
+            # Last value will be not tuple. Scip because it has no following point.
+            if type(pt) is tuple:
+                duration  = pt[0]['length']
+                speedFrom = self.__convert_speed(pt[0]['speed'])
+                angleFrom = self.__calibration(speedFrom)
+                speedTo   = self.__convert_speed(pt[1]['speed'])
+                angleTo   = self.__calibration(speedTo)
+
+                self.Speeds.append(
+                    {
+                        'angleFrom' :   angleFrom,
+                        'angleTo'   :   angleTo,
+                        'duration'  :   duration,
+                        'speed'     :   speedFrom
+                    }
+                )
+        #~ print(self.Speeds)
 
 
 # EOF

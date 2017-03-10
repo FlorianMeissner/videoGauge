@@ -39,9 +39,6 @@
 ###################################################################################################
 
 
-# Gauge modules
-#~ import airspeed
-
 # Own libraries
 from lib.calculations   import conversions, triangulation
 from lib.Exceptions     import *
@@ -79,6 +76,80 @@ class AbstractBaseGauge(object):
         self.Needles = []
 
 
+    # ---------------------------------------------------------------------------------------------
+    # - Background color (blue wall)                                                              -
+    # ---------------------------------------------------------------------------------------------
+
+
+    def _create_background(self):
+        """
+        Get clip showing background color over the hole duration of the video.
+        """
+
+        bgSize = int(triangulation.pythagoras(a=self.Size[0], b=self.Size[1]))
+        self.BgClip = mpy.ColorClip(size=(bgSize, bgSize), col=self.BgColor, duration=self.Duration)
+
+
+    def setBackground(self, r, g, b):
+        """
+        Set color for background. Overwrites default.
+        """
+
+        self.BgColor = (r, g, b)
+
+
+    # ---------------------------------------------------------------------------------------------
+    # - Composition                                                                               -
+    # ---------------------------------------------------------------------------------------------
+
+
+    def _addDuration(self, t):
+        """
+        Adds aspecified amound of time to overall clip duration.
+        """
+
+        self.Duration += t
+
+
+    """
+    def setPosition(self, pos):
+        self.position = pos
+
+
+    def setSize(self, w, h):
+        self.size = (w, h)
+    """
+
+
+    # ---------------------------------------------------------------------------------------------
+    # - Faceplate                                                                                 -
+    # ---------------------------------------------------------------------------------------------
+
+
+    def _create_faceplate_clip(self):
+        """
+        Create clip with stanting image of faceplate.
+        """
+
+        self.FaceplateClip = mpy.ImageClip(self.FaceplateImage)
+        self.FaceplateClip = self.FaceplateClip.set_duration(self.Duration)
+
+
+    def setFaceplate(self, path):
+        """
+        Define image containing the faceplate.
+        """
+
+        self.FaceplateImage = path
+
+        # Get image size.
+        with Image.open(path) as im:
+            self.Size = im.size
+
+
+    # ---------------------------------------------------------------------------------------------
+    # - Initializers                                                                              -
+    # ---------------------------------------------------------------------------------------------
 
     def __parse_unit(self):
         """
@@ -105,30 +176,6 @@ class AbstractBaseGauge(object):
     # ---------------------------------------------------------------------------------------------
     # - Needle                                                                                    -
     # ---------------------------------------------------------------------------------------------
-
-    def _rotate_needle(self, values):
-        """
-        Rotate needle image by given angle of track point.
-        This function does the preamptive work for the rotation.
-        """
-
-        for v in values:
-            angleFrom = v['angleFrom']
-
-            # Don't move needle on last trackpoint because there is no next point known to calculate
-            # rotation angle from.
-            key = values.index(v)
-            if key == len(values) - 1:
-                angleTo = angleFrom
-            else:
-                angleTo = v['angleTo']
-
-            # Define duration of rotation.
-            duration = v['duration']
-            if duration > 0:
-                self._addDuration(duration)
-                self.__animateNeedleRotation(angleFrom, angleTo, duration)
-
 
     def __animateNeedleRotation(self, aFrom, aTo, dur):
         """
@@ -159,12 +206,50 @@ class AbstractBaseGauge(object):
         )
 
 
-    def setNeedle(self, path):
+    def __calibration(self, speed):
         """
-        Set base image containing the needle and convert it to be processed further.
+        Calibate scale of faceplate to MPH.
         """
 
-        self.BaseNeedle = mpy.ImageClip(path)
+        calibration = self._Gauge_script.calibration()
+
+        # Get list of known speed values.
+        knownSpeeds = list(calibration.keys())
+        knownSpeeds.sort()
+
+        # Check if value is out of scale.
+        if speed > max(knownSpeeds):
+            speed = max(knownSpeeds)
+
+        # Check for known values and return in directly.
+        if speed in calibration:
+            return calibration[speed]
+
+        # If value is unknown, calculate intermittent one from linear equation between known neighbours
+        # of calibration table.
+        else:
+            # Get neighbours of requested value.
+            lowerNeighbour = 0
+            higherNeighbour = 0
+
+            for i in knownSpeeds:
+                if i < speed:
+                    lowerNeighbour = i
+                    continue
+                if i > speed:
+                    higherNeighbour = i
+                    break
+
+            # Get angle with linear equation.
+            angle = interpolation.linEqu2pt(lowerNeighbour,
+                                            calibration[lowerNeighbour],
+                                            higherNeighbour,
+                                            calibration[higherNeighbour],
+                                            speed)
+
+            # MoviePy uses positive values for counter-clockwise turns.
+            #~ return angle * -1
+            return angle
 
 
     def _concate_needles(self):
@@ -175,75 +260,36 @@ class AbstractBaseGauge(object):
         self.NeedleClip = mpy.concatenate_videoclips(self.Needles, method="compose", bg_color=None)
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Faceplate                                                                                 -
-    # ---------------------------------------------------------------------------------------------
-
-
-    def setFaceplate(self, path):
+    def _rotate_needle(self, values):
         """
-        Define image containing the faceplate.
+        Rotate needle image by given angle of track point.
+        This function does the preamptive work for the rotation.
         """
 
-        self.FaceplateImage = path
+        for v in values:
+            angleFrom = v['angleFrom']
 
-        # Get image size.
-        with Image.open(path) as im:
-            self.Size = im.size
+            # Don't move needle on last trackpoint because there is no next point known to calculate
+            # rotation angle from.
+            key = values.index(v)
+            if key == len(values) - 1:
+                angleTo = angleFrom
+            else:
+                angleTo = v['angleTo']
+
+            # Define duration of rotation.
+            duration = v['duration']
+            if duration > 0:
+                self._addDuration(duration)
+                self.__animateNeedleRotation(angleFrom, angleTo, duration)
 
 
-    def _create_faceplate_clip(self):
+    def setNeedle(self, path):
         """
-        Create clip with stanting image of faceplate.
-        """
-
-        self.FaceplateClip = mpy.ImageClip(self.FaceplateImage)
-        self.FaceplateClip = self.FaceplateClip.set_duration(self.Duration)
-
-
-    # ---------------------------------------------------------------------------------------------
-    # - Background color (blue wall)                                                              -
-    # ---------------------------------------------------------------------------------------------
-
-
-    def setBackground(self, r, g, b):
-        """
-        Set color for background. Overwrites default.
+        Set base image containing the needle and convert it to be processed further.
         """
 
-        self.BgColor = (r, g, b)
-
-
-    def _create_background(self):
-        """
-        Get clip showing background color over the hole duration of the video.
-        """
-
-        bgSize = int(triangulation.pythagoras(a=self.Size[0], b=self.Size[1]))
-        self.BgClip = mpy.ColorClip(size=(bgSize, bgSize), col=self.BgColor, duration=self.Duration)
-
-
-    # ---------------------------------------------------------------------------------------------
-    # - Composition                                                                               -
-    # ---------------------------------------------------------------------------------------------
-
-
-    """
-    def setPosition(self, pos):
-        self.position = pos
-
-
-    def setSize(self, w, h):
-        self.size = (w, h)
-    """
-
-
-    def _addDuration(self, t):
-        """
-        Adds aspecified amound of time to overall clip duration.
-        """
-
-        self.Duration += t
+        self.BaseNeedle = mpy.ImageClip(path)
 
 
 #EOF
