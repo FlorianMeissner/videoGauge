@@ -8,21 +8,28 @@
 # Description
 # ===========
 
-# Collection of gauge templates used for Video gauge Creator. To add new templates, create a
+# Collection of gauge templates used for Video Gauge Creator. To add new templates, create a
 # subfolder according to the following structure.
 
 # <VideoGauge>
 #   gauges
 #       gauge1
-#           faceplate.png
-#           needle.png
 #           __init__.py
+#           unit1.py
+#           unit1_faceplate.png
+#           unit1_needle.png
+#           unit2.py
+#           unit2_faceplate.png
+#           unit2_needle.png
 #       gauge2
 #           ...
+#       __init__.py (this file)
+#       BaseGauge.py
+#       Gauge1.py
+#       Gauge2.py
+#       ...
 
 # Look at the existing gauges for further information.
-
-# At last, add the subfolder and gauge class to the end of this file.
 
 
 # TODO
@@ -36,20 +43,21 @@
 
 # Creator:  Florian Meissner
 #           n1990b@gmx.de
-# Version:  0.1
-# Date:     2017/02/21
+# Version:  0.2
+# Date:     2017/03/09
 
 
 # VERSION HISTORY
 # ===============
 
-# 0.1:  Initial Beta
+# 0.1:  - Initial Beta
+# 0.2:  - Changed description of file sturcture above.
 
 
 ###################################################################################################
 
 
-#from airspeed_luscombe_mph import AirspeedLuscombeMPH
+import Airspeed
 
 
 # EOF
