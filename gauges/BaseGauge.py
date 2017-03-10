@@ -40,7 +40,7 @@
 
 
 # Own libraries
-from lib.calculations   import conversions, triangulation
+from lib.calculations   import conversions, interpolation, triangulation
 from lib.Exceptions     import *
 from lib.myMisc         import basePath
 
@@ -206,7 +206,7 @@ class AbstractBaseGauge(object):
         )
 
 
-    def __calibration(self, speed):
+    def _calibration(self, speed):
         """
         Calibate scale of faceplate to MPH.
         """

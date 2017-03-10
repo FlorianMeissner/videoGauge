@@ -43,11 +43,9 @@ import BaseGauge
 
 # Own library modules
 from lib.calculations       import conversions
-from lib.calculations       import interpolation
 from lib.myMisc             import lookahead
 
 # Foreign libraries
-from PIL                    import Image
 import moviepy.editor       as mpy
 
 
@@ -63,9 +61,9 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         super(self.__class__, self).__init__()
 
         # Variables
-        self.DigSpeed   =   digSpeed    # Show digital speed number in upper left corner.
-        self.Settings   =   settings    # Video settings
-        self.Speeds     =   []          # List with speeds from track point list. Populated by
+        self._DigSpeed  =   digSpeed    # Show digital speed number in upper left corner.
+        self._Settings  =   settings    # Video settings
+        self._Speeds    =   []          # List with speeds from track point list. Populated by
                                         # self.__convert().
 
         # Initializing methods
@@ -89,8 +87,7 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         """
 
         # Create needles
-        #self.__convert_speeds()
-        self._rotate_needle(self.Speeds)
+        self._rotate_needle(self._Speeds)
         self._concate_needles()
 
         # Create faceplate
@@ -105,9 +102,9 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
                        self.NeedleClip.resize(self.Size).set_position(self.position)]
 
         # Create digital speed display.
-        if self.DigSpeed:
+        if self._DigSpeed:
             self.__show_speed()
-            composition.append(self.speedClip)
+            composition.append(self._SpeedClip)
 
         # Compose clips and export.
         final_video = mpy.CompositeVideoClip(composition)
@@ -116,11 +113,11 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
 
     def save(self, clip, filename, settings=None):
         """
-        Save cmpiled video to disk.
+        Save compiled video to disk.
         """
 
         if settings is None:
-            settings = self.Settings
+            settings = self._Settings
 
         clip.write_videofile(filename,
                              fps=settings['framerate'],
@@ -141,11 +138,11 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         """
 
         # Only shw speeds in verbose mode.
-        if self.DigSpeed:
+        if self._DigSpeed:
 
             # Iterate threw track points and grap speed and length.
             speedClips = []
-            for trkPt in self.Speeds:
+            for trkPt in self._Speeds:
                 speed = "%2.1f" % trkPt['speed']
                 length = trkPt['duration']
 
@@ -161,7 +158,7 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
                                  )
 
             # Merge track point text clips.
-            self.speedClip = mpy.concatenate_videoclips(speedClips)
+            self._SpeedClip = mpy.concatenate_videoclips(speedClips)
 
 
     # ---------------------------------------------------------------------------------------------
@@ -202,11 +199,11 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
             if type(pt) is tuple:
                 duration  = pt[0]['length']
                 speedFrom = self.__convert_speed(pt[0]['speed'])
-                angleFrom = self.__calibration(speedFrom)
+                angleFrom = self._calibration(speedFrom)
                 speedTo   = self.__convert_speed(pt[1]['speed'])
-                angleTo   = self.__calibration(speedTo)
+                angleTo   = self._calibration(speedTo)
 
-                self.Speeds.append(
+                self._Speeds.append(
                     {
                         'angleFrom' :   angleFrom,
                         'angleTo'   :   angleTo,
@@ -214,7 +211,6 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
                         'speed'     :   speedFrom
                     }
                 )
-        #~ print(self.Speeds)
 
 
 # EOF
