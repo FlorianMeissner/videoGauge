@@ -18,9 +18,7 @@
 # TODO
 # ====
 
-# - Add PA28 airspeed indicator
-# - Add G-Meter
-# - Add altimeter
+# See TODO.txt
 
 
 # ABOUT
@@ -28,26 +26,38 @@
 
 # Creator:  Florian Meissner
 #           n1990b@gmx.de
-# Version:  0.1
-# Date:     2017/02/21
+# Version:  0.2
+# Date:     2017/03/10
 
 
 # VERSION HISTORY
 # ===============
 
-# 0.1:  Initial Beta
+# 0.1:  - Initial Beta
+# 0.2:  - Added title centered in console window
+#       - Adjusted gauge class calls to new gauge structure
+#       - Switched gpxpy from local lib to pypi.
 
 
 ###################################################################################################
 
 
+# Gauge modules
+import gauges
+
+# Own libraries
+from lib.calculations.conversions   import colorHex2RGB, splitXY
+from lib.myMisc                     import basePath
+from lib.terminalSize               import getTerminalSize
+
+# Foreign libraries
+import getopt
+import gpxpy
+import logging                      as log
 import os
 import shutil
 import sys
-import getopt
-from lib import gpxpy
-from gauges.airspeed_luscombe_mph import AirspeedLuscombeMPH
-from lib.calculations.conversions import colorHex2RGB, splitXY
+
 
 
 class VideoGauge(object):
@@ -65,18 +75,16 @@ class VideoGauge(object):
                                 "format"            :   "1280x720"
                              }
         self.TMP_FOLDER = "videoGauge_tmp/"
+        self.LOG_FORMAT = "%(levelname)s: %(message)s"
+        self.LOG_LEVEL = "WARNING"
+        self.BASEPATH = basePath(__file__)
 
         # Start calling methods
-        self.__basepath()
+        self.__eventlogger()
         self._getCmdParams()
-
-        self.__print("***********************")
-        self.__print("* Video Gauge Creator *")
-        self.__print("***********************")
-        self.__print("")
-
+        self.__title()
         self._displayHelp()
-        self.__tmp_folder("add")
+        #~ self.__tmp_folder("add")
         self.__output_folder()
         self._chkMissingParams()
         self._readGPX()
@@ -85,8 +93,78 @@ class VideoGauge(object):
         self._printTrkPts()
         self._runGauges()
 
-        self.__tmp_folder("delete")
-        self.__print("Done! Exiting...")
+        #~ self.__tmp_folder("delete")
+        self.__exit()
+
+
+    def __exit(self, msg=None, force=False):
+        """
+        Exiter method
+        """
+
+        if msg is None:
+            msg = "Done! Exiting..."
+
+        if force:
+            log.warning(msg)
+            sys.exit(2)
+        else:
+            log.info(msg)
+            sys.exit(0)
+
+
+    def __eventlogger(self):
+        """
+        Create eventlogger for application.
+        """
+
+        self.logger = log.getLogger()
+        self.logHandler = log.StreamHandler(sys.stdout)
+        #self.logHandler = log.FileHandler()
+        self.logger.addHandler(self.logHandler)
+        self._setLogLevel()
+        self._setLogFormat()
+
+
+    def _setLogFormat(self, fmt="DEFAULT"):
+        """
+        Set fomat of logtext as specified.
+        """
+
+        if fmt == "DEFAULT":
+            fmt = self.LOG_FORMAT
+        self.logHandler.setFormatter(log.Formatter(fmt=fmt))
+
+
+    def _setLogLevel(self, level="DEFAULT"):
+        """
+        DESCRIPTION_MISSING
+        """
+
+        if level == "DEFAULT":
+            level = self.LOG_LEVEL
+        self.logger.setLevel(level.upper())
+
+
+    def __title(self):
+        """
+        Show title
+        """
+
+        self._setLogFormat("%(message)s")
+
+        x, y = getTerminalSize()
+        name = "Video Gauge Creator"
+        spaces = (x - len(name) - 2) / 2
+        x2 = spaces * 2 + len(name) + 2
+        log.critical("*" * x2)
+        log.critical("*" + " " * (x2-2) + "*")
+        log.critical("*" + " " * spaces + name + spaces * " " + "*")
+        log.critical("*" + " " * (x2-2) + "*")
+        log.critical("*" * x2)
+        log.critical("\n")
+
+        self._setLogFormat()
 
 
     # ---------------------------------------------------------------------------------------------
@@ -94,9 +172,11 @@ class VideoGauge(object):
     # ---------------------------------------------------------------------------------------------
 
 
-    # Get all commandline parameters. Function holds a list of default values for each parameter
-    # which will be overridden by command line. Required parameters hold default value "None".
     def _getCmdParams(self):
+        """
+        Get all commandline parameters. Function holds a list of default values for each parameter
+        which will be overridden by command line. Required parameters hold default value "None".
+        """
 
         # Set Default parameters.
         displayHelp = False
@@ -215,8 +295,7 @@ class VideoGauge(object):
         try:
             opts, args = getopt.getopt(sys.argv[1:], options, long_options)
         except getopt.GetoptError as err:
-            self.__print(str(err))
-            sys.exit(2)
+            self.__exit(str(err), True)
         else:
 
             # Parse recognized arguments and overwrite default parameters
@@ -319,12 +398,14 @@ class VideoGauge(object):
                 elif opt == "-v":
                     verbose = True
                     quiet = False
+                    self._setLogLevel('INFO')
 
                 # Quiet mode
                 elif opt == "-q":
                     quiet = True
                     verbose = False
                     force = True
+                    self._setLogLevel('CRITICAL')
 
             # Transfor parameters into public dictionary.
             self.params = { "gpxfile"       :   gpxfile,
@@ -342,21 +423,25 @@ class VideoGauge(object):
                           }
 
 
-    # Check for missing but required parameters from the command line.  A missing parameter is
-    # expected to hold default value "None".
     def _chkMissingParams(self):
+        """
+        Check for missing but required parameters from the command line.  A missing parameter is
+        expected to hold default value "None".
+        """
+
         count = 0
         for opt, arg in self.params.items():
             if arg is None:
-                self.__print("ERROR: Required parameter \"%s\" is missing!" % opt)
+                log.error("Required parameter \"%s\" is missing!" % opt)
                 count+=1
         if count > 0:
-            self.__print("Check \"%s --help\" for further information." % sys.argv[0])
-            sys.exit(2)
+            self.__exit("Check \"%s --help\" for further information." % sys.argv[0], True)
 
 
-    # Run class handler method for wated gauges.
     def _runGauges(self):
+        """
+        Run class handler method for wated gauges.
+        """
 
         # Control variable
         run_something = False
@@ -367,7 +452,7 @@ class VideoGauge(object):
                 self._airspeed()
                 run_something = True
             else:
-                self.__print("WARNING. Unknown unit \"%s\" for 'airspeed'!" % self.params['airspeed']['unit'])
+                log.warning("Unknown unit \"%s\" for 'airspeed'!" % self.params['airspeed']['unit'])
 
         # Altitude indicator
         if self.params['altitude']['display']:
@@ -375,7 +460,7 @@ class VideoGauge(object):
                 self._altitude()
                 run_something = True
             else:
-                self.__print("WARNING. Unknown unit \"%s\" for 'altitude'!" % self.params['altitude']['unit'])
+                log.warning("Unknown unit \"%s\" for 'altitude'!" % self.params['altitude']['unit'])
 
         # Attitude indicator
         if self.params['attitude']['display']:
@@ -398,11 +483,11 @@ class VideoGauge(object):
                 self._vsi()
                 run_something = True
             else:
-                self.__print("WARNING. Unknown unit \"%s\" for 'vsi'!" % self.params['vsi']['unit'])
+                log.warning("Unknown unit \"%s\" for 'vsi'!" % self.params['vsi']['unit'])
 
         # Check if at least one gauge was selected.
         if not run_something:
-            self.__print("WARNING: No gauge selected and no output produced!")
+            log.warning("No gauge selected and no output produced!")
 
 
     # ---------------------------------------------------------------------------------------------
@@ -410,11 +495,15 @@ class VideoGauge(object):
     # ---------------------------------------------------------------------------------------------
 
 
-    # Display Help-text and terminate program.
     def _displayHelp(self):
+        """
+        Display Help-text and terminate program.
+        """
+
         if self.params["displayHelp"]:
-            self.__print("Help!!")
-            sys.exit(0)
+            self._setLogFormat("%(message)s")
+            log.critical("Help!!")
+            self.__exit()
 
 
     # ---------------------------------------------------------------------------------------------
@@ -422,8 +511,11 @@ class VideoGauge(object):
     # ---------------------------------------------------------------------------------------------
 
 
-    # Read given GPX file and extract trackpoints.
     def _readGPX(self):
+        """
+        Read given GPX file and extract trackpoints.
+        """
+
         gpxfile = open(self.params['gpxfile'], 'r')
         gpx = gpxpy.parse(gpxfile, version='1.0')
         self.trkPts = []
@@ -440,13 +532,17 @@ class VideoGauge(object):
                     self.trkPts.append(trkPt)
 
 
-    # Print table with trackpoints.
     def _printTrkPts(self):
+        """
+        Print table with trackpoints.
+        """
+
+        self._setLogFormat("%(message)s")
 
         # Prepare table head
-        self.__print(" Latitude | Longitude | Altitude | Speed | Time ", v=True)
-        self.__print("----------+-----------+----------+-------+------", v=True)
-        self.__print("          |           |          |       |      ", v=True)
+        log.info(" Latitude | Longitude | Altitude | Speed | Time ")
+        log.info("----------+-----------+----------+-------+------")
+        log.info("          |           |          |       |      ")
         #           9       9           8           5       4
 
         for trkPt in self.trkPts:
@@ -480,12 +576,15 @@ class VideoGauge(object):
                 string += "%4.1f | " % trkPt['speed']
 
             string += str(trkPt['time'])
-            self.__print(string, v=True)
+            log.info(string)
 
 
-    # Convert datetime.datetime timestamps from GPX into video squence timestamps. Video sququence
-    # starts at 0 sec.
     def _convertTimestamp(self):
+        """
+        Convert datetime.datetime timestamps from GPX into video squence timestamps. Video sququence
+        starts at 0 sec.
+        """
+
         beginning = 0
         for trkPt in self.trkPts:
 
@@ -517,9 +616,12 @@ class VideoGauge(object):
             self.trkPts[key]['timestamp'] = timestamp
 
 
-    # Get length of frame. Determine time to next frame.
-    # This function also adds the length of each GPX frame to the list of track points.
     def _getFrameLength(self):
+        """
+        Get length of frame. Determine time to next frame.
+        This function also adds the length of each GPX frame to the list of track points.
+        """
+
         trkPtsCount = len(self.trkPts)
 
         for trkPt in self.trkPts:
@@ -545,11 +647,21 @@ class VideoGauge(object):
     # ---------------------------------------------------------------------------------------------
 
 
-    # Handle class operation for airspeed indicator.
     def _airspeed(self):
-        params = self.params['airspeed']
-        gauge = AirspeedLuscombeMPH(self, autorun=False)
+        """
+        Handle class operation for airspeed indicator.
+        """
 
+        params = self.params['airspeed']
+        gauge = gauges.Airspeed.Airspeed(
+            self.trkPts,
+            unit=params['unit'],
+            digSpeed=True,
+            autorun=False,
+            settings=self.VIDEOSETTINGS
+        )
+
+        """
         # Background color
         r, g, b = colorHex2RGB(params['bg'])
         gauge.setBackground(r, g, b)
@@ -560,8 +672,15 @@ class VideoGauge(object):
         # Size
         w, h = splitXY(params['size'])
         gauge.setSize(w, h)
+        """
 
-        gauge.make()
+        clip = gauge.make()
+
+        filename  = self.params['outputfolder']
+        filename += "airspeed"
+        filename += self.VIDEOSETTINGS['filetype']
+
+        gauge.save(clip, filename)
 
 
     # ---------------------------------------------------------------------------------------------
@@ -569,9 +688,12 @@ class VideoGauge(object):
     # ---------------------------------------------------------------------------------------------
 
 
-    # Handle class operation for altitude indicator.
     def _altitude(self):
-        self.__print("Warning: Altitude indicator will be added later!")
+        """
+        Handle class operation for altitude indicator.
+        """
+
+        log.warning("Altitude indicator will be added later!")
 
 
     # ---------------------------------------------------------------------------------------------
@@ -579,9 +701,12 @@ class VideoGauge(object):
     # ---------------------------------------------------------------------------------------------
 
 
-    # Handle class operation for attitude indicator.
     def _attitude(self):
-        self.__print("Warning: Attitude indicator will be added later!")
+        """
+        Handle class operation for attitude indicator.
+        """
+
+        log.warning("Attitude indicator will be added later!")
 
 
     # ---------------------------------------------------------------------------------------------
@@ -589,9 +714,12 @@ class VideoGauge(object):
     # ---------------------------------------------------------------------------------------------
 
 
-    # Handle class operation for compass.
     def _compass(self):
-        self.__print("Warning: Compass will be added later!")
+        """
+        Handle class operation for compass.
+        """
+
+        log.warning("Compass will be added later!")
 
 
     # ---------------------------------------------------------------------------------------------
@@ -599,9 +727,12 @@ class VideoGauge(object):
     # ---------------------------------------------------------------------------------------------
 
 
-    # Handle class operation for G-Meter.
     def _g_meter(self):
-        self.__print("Warning: G-Meter will be added later!")
+        """
+        Handle class operation for G-Meter.
+        """
+
+        log.warning("G-Meter will be added later!")
 
 
     # ---------------------------------------------------------------------------------------------
@@ -609,9 +740,12 @@ class VideoGauge(object):
     # ---------------------------------------------------------------------------------------------
 
 
-    # Handle class operation for vertical speed indicator.
     def _vsi(self):
-        self.__print("Warning: Vertical speed indicator will be added later!")
+        """
+        Handle class operation for vertical speed indicator.
+        """
+
+        log.warning("Vertical speed indicator will be added later!")
 
 
     # ---------------------------------------------------------------------------------------------
@@ -619,24 +753,11 @@ class VideoGauge(object):
     # ---------------------------------------------------------------------------------------------
 
 
-    # Helper method to print messages. 'v' triggers messages only to be displayed in verbose mode.
-    def __print(self, msg, v=False):
-        if self.params['verbose'] and v:
-            print(msg, "verbose")
-        elif not self.params['quiet'] and not v:
-            print(msg)
-
-
-    # Determine original path of the script.
-    def __basepath(self):
-        self.basePath = os.path.dirname(os.path.realpath(__file__))
-        if self.basePath[:-1] != "/":
-            self.basePath += "/"
-        print self.basePath
-
-
-    # Handle output folder for video files.
     def __output_folder(self):
+        """
+        Handle output folder for video files.
+        """
+
         if os.path.isdir(self.params['outputfolder']):
 
             a = "no"
@@ -652,22 +773,10 @@ class VideoGauge(object):
             if a.lower() in ("", "y", "yes") or self.params['force']:
                 shutil.rmtree(self.params['outputfolder'])
             else:
-                self.__print("Aborted by user...")
-                sys.exit(0)
+                self.__exit("Aborted by user...")
 
         # Create new folder.
         os.mkdir(self.params['outputfolder'])
-
-    # Handle folder for temporary files.
-    def __tmp_folder(self, action):
-        if action == "add":
-            if os.path.isdir(self.TMP_FOLDER):
-                shutil.rmtree(self.TMP_FOLDER)
-            os.mkdir(self.TMP_FOLDER)
-        elif action == "delete":
-            shutil.rmtree(self.TMP_FOLDER)
-        else:
-            raise ValueError("Unknown action '%s'." % action)
 
 
 
@@ -676,7 +785,11 @@ class VideoGauge(object):
 # *************************************************************************************************
 
 if __name__ == "__main__":
-    app = VideoGauge()
+    try:
+        app = VideoGauge()
+    except KeyboardInterrupt:
+        print("\nERROR: Aborted by user with Keyboard Interrupt!")
+        sys.exit(2)
 
 
 # EOF

@@ -1,0 +1,20 @@
+VIDEO GAUGE CREATOR TODO
+========================
+
+
+- Change from ffmpeg to avconv
+- Add more gauges
+- Extend verbose/quiet mode
+- Patch artefacts during needle animation (moviepy interpolation mode)
+- Move method description inside methods
+- Check size relation of faceplate and needle
+- Mark BaseGauge class as abstract
+- Create new abstract class containing common methods of needle gauges
+- Create installer script
+- Write readme
+- Create help text
+
+
+Florian Meissner
+n1990b@gmx.de
+2017/03/09
