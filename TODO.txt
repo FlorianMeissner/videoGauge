@@ -6,9 +6,7 @@ VIDEO GAUGE CREATOR TODO
 - Add more gauges
 - Extend verbose/quiet mode
 - Patch artefacts during needle animation (moviepy interpolation mode)
-- Move method description inside methods
 - Check size relation of faceplate and needle
-- Mark BaseGauge class as abstract
 - Create new abstract class containing common methods of needle gauges
 - Create installer script
 - Write readme

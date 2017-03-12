@@ -97,9 +97,9 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         self._create_background()
 
         # Get clips in order. First clip will be played at the bottom, last at the top.
-        composition = [self.BgClip,
-                       self.FaceplateClip.resize(self.Size).set_position(self.position),
-                       self.NeedleClip.resize(self.Size).set_position(self.position)]
+        composition = [self._BgClip,
+                       self._FaceplateClip.resize(self._Size).set_position(self._Position),
+                       self._NeedleClip.resize(self._Size).set_position(self._Position)]
 
         # Create digital speed display.
         if self._DigSpeed:

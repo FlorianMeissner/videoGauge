@@ -64,16 +64,15 @@ class AbstractBaseGauge(object):
         self.BASEPATH = basePath(__file__)
 
         # Defaults
-        self.position = "center"
-        self.tmpFolder = "videoGauge_tmp/"
+        self._Position = "center"
 
         # Initializer methods
         self.__parse_unit()
 
         # Initializers
-        self.BgColor = (0, 0, 255)
-        self.Duration = 0
-        self.Needles = []
+        self._BgColor = (0, 0, 255)
+        self._Duration = 0
+        self._Needles = []
 
 
     # ---------------------------------------------------------------------------------------------
@@ -86,8 +85,8 @@ class AbstractBaseGauge(object):
         Get clip showing background color over the hole duration of the video.
         """
 
-        bgSize = int(triangulation.pythagoras(a=self.Size[0], b=self.Size[1]))
-        self.BgClip = mpy.ColorClip(size=(bgSize, bgSize), col=self.BgColor, duration=self.Duration)
+        bgSize = int(triangulation.pythagoras(a=self._Size[0], b=self._Size[1]))
+        self._BgClip = mpy.ColorClip(size=(bgSize, bgSize), col=self._BgColor, duration=self._Duration)
 
 
     def setBackground(self, r, g, b):
@@ -95,7 +94,7 @@ class AbstractBaseGauge(object):
         Set color for background. Overwrites default.
         """
 
-        self.BgColor = (r, g, b)
+        self._BgColor = (r, g, b)
 
 
     # ---------------------------------------------------------------------------------------------
@@ -108,7 +107,7 @@ class AbstractBaseGauge(object):
         Adds aspecified amound of time to overall clip duration.
         """
 
-        self.Duration += t
+        self._Duration += t
 
 
     """
@@ -131,8 +130,8 @@ class AbstractBaseGauge(object):
         Create clip with stanting image of faceplate.
         """
 
-        self.FaceplateClip = mpy.ImageClip(self.FaceplateImage)
-        self.FaceplateClip = self.FaceplateClip.set_duration(self.Duration)
+        self._FaceplateClip = mpy.ImageClip(self._FaceplateImage)
+        self._FaceplateClip = self._FaceplateClip.set_duration(self._Duration)
 
 
     def setFaceplate(self, path):
@@ -140,11 +139,11 @@ class AbstractBaseGauge(object):
         Define image containing the faceplate.
         """
 
-        self.FaceplateImage = path
+        self._FaceplateImage = path
 
         # Get image size.
         with Image.open(path) as im:
-            self.Size = im.size
+            self._Size = im.size
 
 
     # ---------------------------------------------------------------------------------------------
@@ -199,7 +198,7 @@ class AbstractBaseGauge(object):
 
         # Rotate needle
         # For clockwise rotaion use negative values.
-        self.Needles.append(
+        self._Needles.append(
             baseNeedle.rotate(
                 lambda t: aFrom+t*delta
             )
@@ -257,7 +256,7 @@ class AbstractBaseGauge(object):
         Create video containing all needle positions after another with respective length.
         """
 
-        self.NeedleClip = mpy.concatenate_videoclips(self.Needles, method="compose", bg_color=None)
+        self._NeedleClip = mpy.concatenate_videoclips(self._Needles, method="compose", bg_color=None)
 
 
     def _rotate_needle(self, values):

@@ -656,7 +656,7 @@ class VideoGauge(object):
         gauge = gauges.Airspeed.Airspeed(
             self.trkPts,
             unit=params['unit'],
-            digSpeed=True,
+            digSpeed=False,
             autorun=False,
             settings=self.VIDEOSETTINGS
         )
