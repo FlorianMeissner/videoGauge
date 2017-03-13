@@ -51,7 +51,7 @@ import moviepy.editor       as mpy
 
 class Airspeed(BaseGauge.AbstractBaseGauge):
 
-    def __init__(self, points, unit, digSpeed=False, autorun=False, settings=None):
+    def __init__(self, points, wpInst, unit, digSpeed=False, autorun=False, settings=None):
 
         # Variables used in base class, too.
         self._Unit = unit.lower()
@@ -68,6 +68,8 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
 
         # Initializing methods
         self.__parse_speeds(points)
+        wpInst.showWPtable()
+        wpInst.changeWP(1, altitude=1000)
 
 
         # If autorun is enabled, video animation will be written to disk immediately after gathering

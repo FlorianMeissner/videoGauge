@@ -47,6 +47,7 @@ import gauges
 
 # Own libraries
 from lib.calculations.conversions   import colorHex2RGB, splitXY
+from lib.Datapoint                  import WP
 from lib.myMisc                     import basePath
 from lib.terminalSize               import getTerminalSize
 
@@ -517,8 +518,15 @@ class VideoGauge(object):
         """
 
         gpxfile = open(self.params['gpxfile'], 'r')
-        gpx = gpxpy.parse(gpxfile, version='1.0')
+        gpx = gpxpy.parse(gpxfile, version='1.0')   # Even though that SkyDemon marks its GPX files
+                                                    # as version 1.1, the trackpoints do include
+                                                    # <speed></speed> which is only available in
+                                                    # V1.0. Because GPXPy would parse the files
+                                                    # header, it need to be forced to read in 1.0.
         self.trkPts = []
+
+        # Construct Waypoit class
+        self._wp = WP()
 
         # Parse tracks.
         for track in gpx.tracks:
@@ -530,6 +538,9 @@ class VideoGauge(object):
                              'speed' : point.speed,
                              'time'  : point.time}
                     self.trkPts.append(trkPt)
+                    self._wp.addWP(lat=point.latitude, lon=point.longitude, altitude=point.elevation, \
+                        speed=point.speed, time=point.time)
+        self._wp.showWPtable()
 
 
     def _printTrkPts(self):
@@ -643,7 +654,7 @@ class VideoGauge(object):
 
 
     # ---------------------------------------------------------------------------------------------
-    # - Airspeed indicator                                                                        -
+    # - Call of gauge classes                                                                     -
     # ---------------------------------------------------------------------------------------------
 
 
@@ -655,6 +666,7 @@ class VideoGauge(object):
         params = self.params['airspeed']
         gauge = gauges.Airspeed.Airspeed(
             self.trkPts,
+            self._wp,
             unit=params['unit'],
             digSpeed=False,
             autorun=False,
@@ -682,10 +694,7 @@ class VideoGauge(object):
 
         gauge.save(clip, filename)
 
-
-    # ---------------------------------------------------------------------------------------------
-    # - Altitude indicator                                                                        -
-    # ---------------------------------------------------------------------------------------------
+        self._wp.showWPtable()
 
 
     def _altitude(self):
@@ -696,22 +705,12 @@ class VideoGauge(object):
         log.warning("Altitude indicator will be added later!")
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Attitude indicator                                                                        -
-    # ---------------------------------------------------------------------------------------------
-
-
     def _attitude(self):
         """
         Handle class operation for attitude indicator.
         """
 
         log.warning("Attitude indicator will be added later!")
-
-
-    # ---------------------------------------------------------------------------------------------
-    # - Compass                                                                                   -
-    # ---------------------------------------------------------------------------------------------
 
 
     def _compass(self):
@@ -722,22 +721,12 @@ class VideoGauge(object):
         log.warning("Compass will be added later!")
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - G-Meter                                                                                   -
-    # ---------------------------------------------------------------------------------------------
-
-
     def _g_meter(self):
         """
         Handle class operation for G-Meter.
         """
 
         log.warning("G-Meter will be added later!")
-
-
-    # ---------------------------------------------------------------------------------------------
-    # - Vertical speed indicator                                                                  -
-    # ---------------------------------------------------------------------------------------------
 
 
     def _vsi(self):
