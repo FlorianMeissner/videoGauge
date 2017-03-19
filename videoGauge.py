@@ -85,14 +85,14 @@ class VideoGauge(object):
         self._getCmdParams()
         self.__title()
         self._displayHelp()
-        #~ self.__tmp_folder("add")
         self.__output_folder()
         self._chkMissingParams()
         self._readGPX()
-        self._convertTimestamp()
-        self._getFrameLength()
-        self._printTrkPts()
+        self._wp.changeWP(1, altitude=1000)
+        self._wp.calculate()
         self._runGauges()
+
+        #~ self._wp.showWPtable()
 
         #~ self.__tmp_folder("delete")
         self.__exit()
@@ -540,9 +540,10 @@ class VideoGauge(object):
                     self.trkPts.append(trkPt)
                     self._wp.addWP(lat=point.latitude, lon=point.longitude, altitude=point.elevation, \
                         speed=point.speed, time=point.time)
-        self._wp.showWPtable()
+        #~ self._wp.showWPtable()
 
 
+    '''
     def _printTrkPts(self):
         """
         Print table with trackpoints.
@@ -588,8 +589,10 @@ class VideoGauge(object):
 
             string += str(trkPt['time'])
             log.info(string)
+    '''
 
 
+    '''
     def _convertTimestamp(self):
         """
         Convert datetime.datetime timestamps from GPX into video squence timestamps. Video sququence
@@ -625,8 +628,10 @@ class VideoGauge(object):
 
             # Write timestamp to track points list.
             self.trkPts[key]['timestamp'] = timestamp
+    '''
 
 
+    '''
     def _getFrameLength(self):
         """
         Get length of frame. Determine time to next frame.
@@ -651,6 +656,7 @@ class VideoGauge(object):
                 length = nextTs - ownTs
 
             self.trkPts[key]['length'] = length
+    '''
 
 
     # ---------------------------------------------------------------------------------------------
@@ -693,8 +699,6 @@ class VideoGauge(object):
         filename += self.VIDEOSETTINGS['filetype']
 
         gauge.save(clip, filename)
-
-        self._wp.showWPtable()
 
 
     def _altitude(self):

@@ -66,11 +66,6 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         self._Speeds    =   []          # List with speeds from track point list. Populated by
                                         # self.__convert().
 
-        # Initializing methods
-        self.__parse_speeds(points)
-        wpInst.showWPtable()
-        wpInst.changeWP(1, altitude=1000)
-
 
         # If autorun is enabled, video animation will be written to disk immediately after gathering
         # all data.
