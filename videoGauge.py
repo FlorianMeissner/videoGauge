@@ -21,6 +21,16 @@
 # See TODO.txt
 
 
+# DEPENDENCIES
+# ============
+
+# Python 2.7
+# PIP terminaltables
+#     gpxpy
+#     moviepy
+#     Pillow
+
+
 # ABOUT
 # =====
 
@@ -75,7 +85,6 @@ class VideoGauge(object):
                                 "ffmpeg_threads"    :   8,
                                 "format"            :   "1280x720"
                              }
-        self.TMP_FOLDER = "videoGauge_tmp/"
         self.LOG_FORMAT = "%(levelname)s: %(message)s"
         self.LOG_LEVEL = "WARNING"
         self.BASEPATH = basePath(__file__)
@@ -89,12 +98,8 @@ class VideoGauge(object):
         self._chkMissingParams()
         self._readGPX()
         self._wp.changeWP(1, altitude=1000)
-        #~ self._wp.calculate()
         self._runGauges()
 
-        #~ self._wp.showWPtable()
-
-        #~ self.__tmp_folder("delete")
         self.__exit()
 
 
