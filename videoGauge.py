@@ -89,7 +89,7 @@ class VideoGauge(object):
         self._chkMissingParams()
         self._readGPX()
         self._wp.changeWP(1, altitude=1000)
-        self._wp.calculate()
+        #~ self._wp.calculate()
         self._runGauges()
 
         #~ self._wp.showWPtable()
@@ -540,123 +540,6 @@ class VideoGauge(object):
                     self.trkPts.append(trkPt)
                     self._wp.addWP(lat=point.latitude, lon=point.longitude, altitude=point.elevation, \
                         speed=point.speed, time=point.time)
-        #~ self._wp.showWPtable()
-
-
-    '''
-    def _printTrkPts(self):
-        """
-        Print table with trackpoints.
-        """
-
-        self._setLogFormat("%(message)s")
-
-        # Prepare table head
-        log.info(" Latitude | Longitude | Altitude | Speed | Time ")
-        log.info("----------+-----------+----------+-------+------")
-        log.info("          |           |          |       |      ")
-        #           9       9           8           5       4
-
-        for trkPt in self.trkPts:
-            # Print table with trackpoints.
-            string = " "
-
-            if trkPt['lat'] < 10:
-                string += " %7.5f | " % trkPt['lat']
-            else:
-                string += "%7.5f | " % trkPt['lat']
-
-            if trkPt['lon'] < 10:
-                string += "  %7.5f | " % trkPt['lon']
-            elif trkPt['lon'] < 100:
-                string += " %7.5f | " % trkPt['lon']
-            else:
-                string += "%7.5f | " % trkPt['lon']
-
-            if trkPt['alt'] < 10:
-                string += "  %7.4f | " % trkPt['alt']
-            elif trkPt['alt'] < 100:
-                string += " %7.4f | " % trkPt['alt']
-            else:
-                string += "%7.4f | " % trkPt['alt']
-
-            if trkPt['speed'] < 10:
-                string += " %4.1f | " % trkPt['speed']
-            elif trkPt['speed'] < 100:
-                string += " %4.1f | " % trkPt['speed']
-            else:
-                string += "%4.1f | " % trkPt['speed']
-
-            string += str(trkPt['time'])
-            log.info(string)
-    '''
-
-
-    '''
-    def _convertTimestamp(self):
-        """
-        Convert datetime.datetime timestamps from GPX into video squence timestamps. Video sququence
-        starts at 0 sec.
-        """
-
-        beginning = 0
-        for trkPt in self.trkPts:
-
-            # Get key of track point.
-            key = self.trkPts.index(trkPt)
-
-            # Calculate timestamp. First second of video will be 0.
-            year   = trkPt['time'].year
-            month  = trkPt['time'].month
-            day    = trkPt['time'].day
-            hour   = trkPt['time'].hour
-            minute = trkPt['time'].minute
-            second = trkPt['time'].second
-
-            timestamp  = second
-            timestamp += minute * 60
-            timestamp += hour * 3600
-            timestamp += day * 86400
-
-            # If it is the first track point, save time as reference.
-            if beginning == 0:
-                beginning = timestamp
-
-            # Subtract track points timestamp from reference to get elapsed seconds since track
-            # started.
-            timestamp = timestamp - beginning
-
-            # Write timestamp to track points list.
-            self.trkPts[key]['timestamp'] = timestamp
-    '''
-
-
-    '''
-    def _getFrameLength(self):
-        """
-        Get length of frame. Determine time to next frame.
-        This function also adds the length of each GPX frame to the list of track points.
-        """
-
-        trkPtsCount = len(self.trkPts)
-
-        for trkPt in self.trkPts:
-
-            # get key of track point.
-            key = self.trkPts.index(trkPt)
-
-            # If last track point, set length to 0.
-            if key == trkPtsCount - 1:
-                length = 0
-
-            # Process all other track points.
-            else:
-                ownTs = trkPt['timestamp']
-                nextTs = self.trkPts[key+1]['timestamp']
-                length = nextTs - ownTs
-
-            self.trkPts[key]['length'] = length
-    '''
 
 
     # ---------------------------------------------------------------------------------------------

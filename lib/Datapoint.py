@@ -78,7 +78,9 @@ class WP(object):
     DEFAULT_U_WINDSPD   =   U_KT
 
     # Control variables
+    __listCalculated = False
     __listOrdered = False
+    __refTimestamp = None
 
 
     def __init__(self):
@@ -121,7 +123,10 @@ class WP(object):
             }
         )
 
+        # Perfom gap filling calculations.
         self.__listOrdered = False
+        self.__listCalculated = False
+        self.__calculate()
 
 
     def changeWP(self, ident, altitude=None, duration=None, g=None, heading=None, lat=None, \
@@ -201,16 +206,10 @@ class WP(object):
         if not changedSomething:
             raise ValueError("At least one parameter must be specified!")
 
+        # Perfom gap filling calculations.
         self.__listOrdered = False
-
-
-    def calculate(self):
-        self.showWPtable()
-        self.__convertTimestamp()
-        self.__orderByParam('timestamp')
-        self.__videoTimestamp()
-        self.__getNeighbour()
-        self.showWPtable()
+        self.__listCalculated = False
+        self.__calculate()
 
 
     def getWPListLength(self):
@@ -296,15 +295,35 @@ class WP(object):
         print("          |           |          |       |      ")
         #           9       9           8           5       4
 
-        for line in self.__iterWPlist(subfunc, ret=True):
-            print line
-
+        retVal = self.__iterWPlist(subfunc, ret=True)
+        if isinstance(retVal, list):
+            for line in retVal:
+                print(line)
+        else:
+            print(retVal)
         print("")
 
 
     # ---------------------------------------------------------------------------------------------
     # - Calculation methods                                                                       -
     # ---------------------------------------------------------------------------------------------
+
+
+    def __calculate(self):
+        """
+        Perform a series of calculatios to fill gaps in the waypoint list. These can be either
+        artificial values needed for gauge animations or flight data not provides by GPS.
+        """
+
+        self.showWPtable()
+
+        if not self.__listCalculated:
+            self.__convertTimestamp()
+            self.__orderByParam('timestamp')
+            self.__videoTimestamp()
+            self.__getNeighbour()
+            #~ self.showWPtable()
+            self.__listCalculated = True
 
 
     def __convertTimestamp(self, epoch=datetime(1970,1,1)):
@@ -318,7 +337,6 @@ class WP(object):
             ts = wp['timestamp']
 
             if ts is None:
-                #~ print type(t), type(epoch)
                 td = t - epoch
                 ts = td.total_seconds()
                 return ('timestamp', ts)
@@ -401,26 +419,26 @@ class WP(object):
             wp = self.getWP(i, "index")
 
             if args is None:
-                print("args: None")
+                #~ print("args: None")
                 if passIndex:
                     retVal = func(wp, i)
                 else:
                     retVal = func(wp)
 
             elif isinstance(args, dict):
-                print("args: Dict")
+                #~ print("args: Dict")
                 if passIndex:
                     args['i'] = i
                 retVal = func(wp, **args)
 
             elif args is tuple or args is list:
-                print("args: Tuple, List")
+                #~ print("args: Tuple, List")
                 if passIndex:
                     args.append(i)
                 retVal = func(wp, *args)
 
             else:
-                print("args: else")
+                #~ print("args: else")
                 if passIndex:
                     retVal = func(wp, i, args)
                 else:
@@ -432,7 +450,7 @@ class WP(object):
             elif retVal == "CONTINUE":
                 continue
 
-            if writeChange:
+            if writeChange and retVal is not None:
                 self.changeWP(i, **{retVal[0]:retVal[1]})
 
             if ret:
@@ -460,26 +478,22 @@ class WP(object):
         Convert timestamps to video position. First waypoint will be 0 seconds.
         """
 
-        def firstTs(wp, i):
-            if i == 0:
-                return wp['timestamp']
-            else:
-                return "BREAK"
-
-
         def calculator(wp, ref):
-            ts = wp['timestamp'] - ref
-            return ('timestamp', ts)
-
+            ts = wp['timestamp']
+            if ts >= ref:
+                ts = ts - ref
+                return ('timestamp', ts)
 
         # Check if waypoints are in order. Don't check by which parameter they were ordered.
         # If unordered, order by timestamp.
         if not self.__listOrdered:
             self.__orderByParam('timestamp')
 
-        ref = self.__iterWPlist(firstTs, passIndex=True, ret=True)
-        self.__iterWPlist(calculator, ref, writeChange=True)
+        # Get unix timestamp of first waypoint as reference. This is done only once.
+        if self.__refTimestamp is None:
+            self.__refTimestamp = self.getWP(0, 'index')['timestamp']
 
+        self.__iterWPlist(calculator, self.__refTimestamp, writeChange=True)
 
 
 #EOF
