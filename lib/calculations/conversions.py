@@ -35,25 +35,8 @@
 ###################################################################################################
 
 
-# Vertical Speed
-# ==============
-
-def ftmin2ms(ftmin):
-    ftmin = float(ftmin)
-    mmin = ftmin * 0.3048
-    ms = mmin / 60
-    return ms
-
-
-def ms2ftmin(ms):
-    ms = float(ms)
-    mmin = ms * 60
-    ftmin = mmin / 0.3048
-    return ftmin
-
-
-# Airspeed
-# ========
+# Speed
+# =====
 
 def ms2kmh(ms):
     ms = float(ms)
@@ -76,6 +59,13 @@ def ms2kt(ms):
     return kt
 
 
+def ms2ftmin(ms):
+    ms = float(ms)
+    mmin = ms * 60
+    ftmin = mmin / 0.3048
+    return ftmin
+
+
 def kmh2ms(kmh):
     kmh = float(kmh)
     mh = kmh * 1000
@@ -93,6 +83,10 @@ def kmh2kt(kmh):
     kmh = float(kmh)
     kt = kmh / 1.852
     return kt
+
+
+def kmh2ftmin(kmh):
+    pass
 
 
 def mph2ms(mph):
@@ -114,6 +108,10 @@ def mph2kt(mph):
     return kt
 
 
+def mph2ftmin(mph):
+    pass
+
+
 def kt2ms(kt):
     kt = float(kt)
     sms = kt / 3600
@@ -133,6 +131,29 @@ def kt2mph(kt):
     return mph
 
 
+def kt2ftmin(kt):
+    pass
+
+
+def ftmin2ms(ftmin):
+    ftmin = float(ftmin)
+    mmin = ftmin * 0.3048
+    ms = mmin / 60
+    return ms
+
+
+def ftmin2kmh(ftmin):
+    pass
+
+
+def ftmin2mph(ftmin):
+    pass
+
+
+def ftmin2kt(ftmin):
+    pass
+
+
 # Altitude
 # ========
 
@@ -147,6 +168,16 @@ def m2ft(m):
     ft = m / 0.3048
     return ft
 
+
+# Air pressure
+# ============
+
+def inhg2hpa(inhg):
+    pass
+
+
+def hpa2inhg(hpa):
+    pass
 
 # Color
 # =====

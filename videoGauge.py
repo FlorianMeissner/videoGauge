@@ -543,8 +543,13 @@ class VideoGauge(object):
                              'speed' : point.speed,
                              'time'  : point.time}
                     self.trkPts.append(trkPt)
-                    self._wp.addWP(lat=point.latitude, lon=point.longitude, altitude=point.elevation, \
-                        speed=point.speed, time=point.time)
+                    self._wp.addWP(
+                        lat=point.latitude, \
+                        lon=point.longitude, \
+                        altitude=point.elevation, altitude_unit=self._wp.U_M, \
+                        speed=point.speed, \
+                        time=point.time
+                    )
 
 
     # ---------------------------------------------------------------------------------------------

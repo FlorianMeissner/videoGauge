@@ -36,6 +36,10 @@
 ###################################################################################################
 
 
+# own libraries
+from lib.calculations.conversions import *
+
+# foreign libraries
 from datetime import datetime
 from operator import itemgetter
 from terminaltables import AsciiTable as Table
@@ -78,6 +82,24 @@ class WP(object):
     DEFAULT_U_WINDDIR   =   U_DEG
     DEFAULT_U_WINDSPD   =   U_KT
 
+    # Possible units
+    U_ALTITUDE = (U_FT, U_M)
+    U_DURATION = (U_SEC, U_MIN, U_HR)
+    #~ U_G = ()
+    U_HEADING = (U_DEG)
+    U_LAT = (U_DEG)
+    U_LON = (U_DEG)
+    U_PITCH = (U_DEG)
+    U_QNH = (U_INHG, U_HPA)
+    U_ROLL = (U_DEG)
+    U_SPEED = (U_KT, U_MPH, U_KMH)
+    #~ U_TIME = ()
+    U_TIMESTAMP = (U_SEC)
+    U_VSI = (U_FTMIN, U_MS)
+    U_WINDDIR = (U_DEG)
+    U_WINDSPD = (U_KT, U_MPH, U_KMH, U_FTMIN, U_MS)
+
+
     # Control variables
     __listCalculated = False
     __listOrdered = False
@@ -93,13 +115,130 @@ class WP(object):
     # ---------------------------------------------------------------------------------------------
 
 
-    def addWP(self, altitude=None, duration=None, g=None, heading=None, lat=None, lon=None, \
-        pitch=None, qnh=None, roll=None, speed=None, time=None, timestamp=None, vsi=None, \
-        windDir=None, windSpd=None):
+    def addWP(self, \
+        altitude    =   None,   altitude_unit   =   DEFAULT_U_ALTITUDE, \
+        duration    =   None,   duration_unit   =   DEFAULT_U_DURATION, \
+        g           =   None, \
+        heading     =   None,   heading_unit    =   DEFAULT_U_HEADING, \
+        lat         =   None,   lat_unit        =   DEFAULT_U_LAT, \
+        lon         =   None,   lon_unit        =   DEFAULT_U_LON, \
+        pitch       =   None,   pitch_unit      =   DEFAULT_U_PITCH, \
+        qnh         =   None,   qnh_unit        =   DEFAULT_U_QNH, \
+        roll        =   None,   roll_unit       =   DEFAULT_U_ROLL, \
+        speed       =   None,   speed_unit      =   DEFAULT_U_SPEED, \
+        time        =   None, \
+        timestamp   =   None,   timestamp_unit  =   DEFAULT_U_TIMESTAMP, \
+        vsi         =   None,   vsi_unit        =   DEFAULT_U_VSI, \
+        windDir     =   None,   windDir_unit    =   DEFAULT_U_WINDDIR, \
+        windSpd     =   None,   windSpd_unit    =   DEFAULT_U_WINDSPD):
 
         """
         Add waypoint to list. For a waypoint at least one parameter should be given.
         """
+
+        addedSomething = False
+
+        # Check units.
+        if altitude is not None:
+            if altitude_unit not in self.U_ALTITUDE:
+                raise ValueError("Unknown unit for altitude '%s'!" % altitude_unit)
+            elif altitude_unit == self.U_M:
+                altitude = m2ft(altitude)
+            addedSomething = True
+
+        if duration is not None:
+            if duration_unit not in self.U_DURATION:
+                raise ValueError("Unknown unit for duration '%s'!" % duration_unit)
+            elif duration_unit == self.U_MIN:
+                duration = duration * 60
+            elif duration_unit == self.U_HR:
+                duration = duration * 3600
+            addedSomething = True
+
+        if g is not None:
+            """
+            if ge_unit not in self.U_G:
+                raise ValueError("Unknown unit for g '%s'!" % g_unit)
+            """
+            addedSomething = True
+
+        if heading is not None:
+            if heading_unit not in self.U_HEADING:
+                raise ValueError("Unknown unit for heading '%s'!" % heading_unit)
+            addedSomething = True
+
+        if lat is not None:
+            if lat_unit not in self.U_LAT:
+                raise ValueError("Unknown unit for lat '%s'!" % lat_unit)
+            addedSomething = True
+
+        if lon is not None:
+            if lon_unit not in self.U_LON:
+                raise ValueError("Unknown unit for lon '%s'!" % lon_unit)
+            addedSomething = True
+
+        if pitch is not None:
+            if pitch_unit not in self.U_PITCH:
+                raise ValueError("Unknown unit for pitch '%s'!" % pitch_unit)
+            addedSomething = True
+
+        if qnh is not None:
+            if qnh_unit not in self.U_QNH:
+                raise ValueError("Unknown unit for qnh '%s'!" % qnh_unit)
+            elif qnh_unit == self.U_INHG:
+                altitude = inhg2hpa(qnh)
+            addedSomething = True
+
+        if roll is not None:
+            if roll_unit not in self.U_ROLL:
+                raise ValueError("Unknown unit for roll '%s'!" % roll_unit)
+            addedSomething = True
+
+        if speed is not None:
+            if speed_unit not in self.U_SPEED:
+                raise ValueError("Unknown unit for speed '%s'!" % speed_unit)
+            elif speed_unit == self.U_MPH:
+                speed = mph2kt(speed)
+            elif speed_unit == self.U_KMH:
+                speed = kmh2kt(speed)
+            addedSomething = True
+
+        if time is not None:
+            """
+            if time_unit not in self.U_TIME:
+                raise ValueError("Unknown unit for time '%s'!" % time_unit)
+            """
+            addedSomething = True
+
+        if timestamp is not None:
+            if timestamp_unit not in self.U_TIMESTAMP:
+                raise ValueError("Unknown unit for timestamp '%s'!" % timestamp_unit)
+            addedSomething = True
+
+        if vsi is not None:
+            if vsi_unit not in self.U_VSI:
+                raise ValueError("Unknown unit for vsi '%s'!" % vsi_unit)
+            elif vsi_unit == self.U_MS:
+                vsi = ms2ftmin(vsi)
+            addedSomething = True
+
+        if windDir is not None:
+            if windDir_unit not in self.U_WINDDIR:
+                raise ValueError("Unknown unit for windDir '%s'!" % windDir_unit)
+            addedSomething = True
+
+        if windSpd is not None:
+            if windSpd_unit not in self.U_WINDSPD:
+                raise ValueError("Unknown unit for windSpd '%s'!" % windSpd_unit)
+            elif windSpd_unit == self.U_MPH:
+                windSpd = mph2kt(windSpd)
+            elif windSpd_unit == self.U_KMH:
+                windSpd = kmh2kt(windSpd)
+            elif windSpd_unit == self.U_FTMIN:
+                windSpd = ftmin2kt(windSpd)
+            elif windSpd_unit == self.U_MS:
+                windSpd = ms2kt(windSpd)
+            addedSomething = True
 
         self.WPlist.append(
             {
@@ -121,7 +260,6 @@ class WP(object):
                 "windSpd"   :   windSpd,
 
                 # Support fields
-                "duration"          :   None,
                 "higherNeighbour"   :   None,
                 "lowerNeighbour"    :   None
             }
@@ -251,66 +389,6 @@ class WP(object):
             raise ValueError("Unknown ident_type %s" % ident_type)
 
 
-    '''
-    def showWPtable(self):
-        """
-        Show a table like pattern containing all waypoints stored at the time this method is called.
-        """
-
-        def subfunc(wp):
-
-            # Print table with trackpoints.
-            string = " "
-
-            if wp['lat'] < 10:
-                string += " %7.5f | " % wp['lat']
-            else:
-                string += "%7.5f | " % wp['lat']
-
-            if wp['lon'] < 10:
-                string += "  %7.5f | " % wp['lon']
-            elif wp['lon'] < 100:
-                string += " %7.5f | " % wp['lon']
-            else:
-                string += "%7.5f | " % wp['lon']
-
-            if wp['altitude'] < 10:
-                string += "  %7.4f | " % wp['altitude']
-            elif wp['altitude'] < 100:
-                string += " %7.4f | " % wp['altitude']
-            else:
-                string += "%7.4f | " % wp['altitude']
-
-            if wp['speed'] < 10:
-                string += " %4.1f | " % wp['speed']
-            elif wp['speed'] < 100:
-                string += " %4.1f | " % wp['speed']
-            else:
-                string += "%4.1f | " % wp['speed']
-
-            string += str(wp['time'])
-            string += ", %s sec" % wp['timestamp']
-            string += ", %s, %s" % (wp['lowerNeighbour'], wp['higherNeighbour'])
-            string += ", %s" % wp['duration']
-            return string
-
-        # Prepare table head
-        print("")
-        print(" Latitude | Longitude | Altitude | Speed | Time ")
-        print("----------+-----------+----------+-------+------")
-        print("          |           |          |       |      ")
-        #           9       9           8           5       4
-
-        retVal = self.__iterWPlist(subfunc, ret=True)
-        if isinstance(retVal, list):
-            for line in retVal:
-                print(line)
-        else:
-            print(retVal)
-        print("")
-    '''
-
-
     def showWPtable(self):
         """
         Show a table like pattern containing all waypoints stored at the time this method is called.
@@ -346,17 +424,23 @@ class WP(object):
         rows = []
         rows.append(['Lat', 'Lon', 'Alt', 'Spd', 'Time', 'Ts', 'Nb', 'Dur'])
 
+        # Parse returned lines. If thereis more then one line, the returned list containes
+        # additional listes and needs to be itterated threw.
         ret = self.__iterWPlist(subfunc, ret=True)
         if isinstance(ret[0], list):
             for line in ret:
                 rows.append(line)
         else:
             rows.append(ret)
+
+        # Construct table
         tbl = Table(rows)
 
+        # Align columns containing numerical data right.
         for col in (0, 1, 2, 3, 5, 7):
             tbl.justify_columns[col] = 'right'
 
+        # Show table
         print tbl.table + '\n'
 
 
