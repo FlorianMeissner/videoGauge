@@ -38,6 +38,7 @@
 
 from datetime import datetime
 from operator import itemgetter
+from terminaltables import AsciiTable as Table
 import logging
 
 
@@ -102,6 +103,7 @@ class WP(object):
 
         self.WPlist.append(
             {
+                # Actual data fields
                 "altitude"  :   altitude,
                 "duration"  :   duration,
                 "g"         :   g,
@@ -118,8 +120,10 @@ class WP(object):
                 "windDir"   :   windDir,
                 "windSpd"   :   windSpd,
 
-                "lowerNeighbour"    :   None,
-                "higherNeighbour"   :   None
+                # Support fields
+                "duration"          :   None,
+                "higherNeighbour"   :   None,
+                "lowerNeighbour"    :   None
             }
         )
 
@@ -247,6 +251,7 @@ class WP(object):
             raise ValueError("Unknown ident_type %s" % ident_type)
 
 
+    '''
     def showWPtable(self):
         """
         Show a table like pattern containing all waypoints stored at the time this method is called.
@@ -286,6 +291,7 @@ class WP(object):
             string += str(wp['time'])
             string += ", %s sec" % wp['timestamp']
             string += ", %s, %s" % (wp['lowerNeighbour'], wp['higherNeighbour'])
+            string += ", %s" % wp['duration']
             return string
 
         # Prepare table head
@@ -302,6 +308,56 @@ class WP(object):
         else:
             print(retVal)
         print("")
+    '''
+
+
+    def showWPtable(self):
+        """
+        Show a table like pattern containing all waypoints stored at the time this method is called.
+        """
+
+        def subfunc(wp):
+
+            # Print table with trackpoints.
+            line = []
+
+            line.append("%7.5f" % wp['lat'])
+            line.append("%7.5f" % wp['lon'])
+            line.append("%7.4f" % wp['altitude'])
+            line.append("%4.1f" % wp['speed'])
+            line.append(str(wp['time']))
+            line.append("%s" % wp['timestamp'])
+
+            if isinstance(wp['lowerNeighbour'], str):
+                lNb = wp['lowerNeighbour'][0]
+            else:
+                lNb = wp['lowerNeighbour']
+
+            if isinstance(wp['higherNeighbour'], str):
+                hNb = wp['higherNeighbour'][0]
+            else:
+                hNb = wp['higherNeighbour']
+
+            line.append("%s, %s" % (lNb, hNb))
+            line.append("%s" % wp['duration'])
+            return line
+
+        # Prepare table head
+        rows = []
+        rows.append(['Lat', 'Lon', 'Alt', 'Spd', 'Time', 'Ts', 'Nb', 'Dur'])
+
+        ret = self.__iterWPlist(subfunc, ret=True)
+        if isinstance(ret[0], list):
+            for line in ret:
+                rows.append(line)
+        else:
+            rows.append(ret)
+        tbl = Table(rows)
+
+        for col in (0, 1, 2, 3, 5, 7):
+            tbl.justify_columns[col] = 'right'
+
+        print tbl.table + '\n'
 
 
     # ---------------------------------------------------------------------------------------------
@@ -322,6 +378,7 @@ class WP(object):
             self.__orderByParam('timestamp')
             self.__videoTimestamp()
             self.__getNeighbour()
+            self.__getDuration()
             #~ self.showWPtable()
             self.__listCalculated = True
 
@@ -344,30 +401,26 @@ class WP(object):
         ret = self.__iterWPlist(subfunc, {'epoch':epoch}, writeChange=True)
 
 
-    def __getTimeLength(self):
+    def __getDuration(self):
         """
         Get length of frame. Determine time to next frame.
         This function also adds the length of each GPX frame to the list of track points.
         """
 
-        trkPtsCount = len(self.trkPts)
+        #~ print "GetDuration"
 
-        for trkPt in self.trkPts:
-
-            # get key of track point.
-            key = self.trkPts.index(trkPt)
-
-            # If last track point, set length to 0.
-            if key == trkPtsCount - 1:
-                length = 0
-
-            # Process all other track points.
+        def subfunc(wp):
+            if wp['higherNeighbour'] == "LAST":
+                if wp['duration'] is None:
+                    return ('duration', 0.0)
             else:
-                ownTs = trkPt['timestamp']
-                nextTs = self.trkPts[key+1]['timestamp']
-                length = nextTs - ownTs
+                myTs = wp['timestamp']
+                nextTs = self.getWP(wp['higherNeighbour'], 'index')['timestamp']
+                length = nextTs - myTs
+                if wp['duration'] != length:
+                    return ('duration', length)
 
-            self.trkPts[key]['length'] = length
+        self.__iterWPlist(subfunc, writeChange=True)
 
 
     def __getNeighbour(self):
@@ -377,25 +430,29 @@ class WP(object):
         neighbour to LAST.
         """
 
-        print("GetNeighbour")
+        #~ print("GetNeighbour")
+
         def subfunc(wp, i, direction):
             """
             direction expects L or H for lower and higher neighbour.
             """
 
             if direction == "L":
-                if i == 0:
-                    ret = "FIRST"
-                else:
-                    ret = i -1
-                return ('lowerNeighbour', ret)
+                if wp['lowerNeighbour'] is None:
+                    if i == 0:
+                        ret = "FIRST"
+                    else:
+                        ret = i -1
+                    return ('lowerNeighbour', ret)
 
             elif direction == "H":
                 if i == self.getWPListLength() - 1:
-                    ret = "LAST"
+                    if wp['higherNeighbour'] != "LAST":
+                        return ('higherNeighbour', 'LAST')
                 else:
                     ret = i + 1
-                return ('higherNeighbour', ret)
+                    if ret != wp['higherNeighbour']:
+                        return ('higherNeighbour', ret)
 
             else:
                 raise ValueError("Unknown parameter %s for direction." % direction)
