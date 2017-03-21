@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-# *************************************************************************************************
-# * Data Point Storage Class                                                                     *
-# *************************************************************************************************
+# *****************************************************************************
+# * Data Point Storage Class                                                  *
+# *****************************************************************************
 
 
 # Description
@@ -33,7 +33,7 @@
 # 0.1:  - Initial Beta
 
 
-###################################################################################################
+###############################################################################
 
 
 # own libraries
@@ -110,9 +110,9 @@ class WP(object):
         pass
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Interface methods                                                                         -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Interface methods                                                     -
+    # -------------------------------------------------------------------------
 
 
     def addWP(self, \
@@ -133,12 +133,13 @@ class WP(object):
         windSpd     =   None,   windSpd_unit    =   DEFAULT_U_WINDSPD):
 
         """
-        Add waypoint to list. For a waypoint at least one parameter should be given.
+        Add waypoint to list. For a waypoint at least one parameter should be
+        given.
         """
 
         # Check if at least one parameters has been set.
-        params = (altitude, duration, g, heading, lat, lon, pitch, qnh, roll, speed, time, \
-            timestamp, vsi, windDir, windSpd)
+        params = (altitude, duration, g, heading, lat, lon, pitch, qnh, roll, \
+            speed, time, timestamp, vsi, windDir, windSpd)
 
         if all(v is None for v in params):
             raise ValueError("Specify at least one parameter to add a new waypoint.")
@@ -290,7 +291,8 @@ class WP(object):
         higherNeighbour =   None):
 
         """
-        Change the given parameters of a waypoint identified by its list index in ident.
+        Change the given parameters of a waypoint identified by its list index
+        in ident.
         """
 
         # Check if at least one parameters has been set.
@@ -464,8 +466,9 @@ class WP(object):
         Return a Waypoint by a given identifier and identification mode.
         ident_type can be "index" or "time".
 
-        "index" returns a given list index and "time" the first list item matching the timestamp
-        given in "identifier" in "absolute"-mode or the closed match in "nearest"-mode.
+        "index" returns a given list index and "time" the first list item
+        matching the timestamp given in "identifier" in "absolute"-mode or the
+        closed match in "nearest"-mode.
         """
 
         ident_type = ident_type.lower()
@@ -488,7 +491,8 @@ class WP(object):
 
     def showWPtable(self):
         """
-        Show a table like pattern containing all waypoints stored at the time this method is called.
+        Show a table like pattern containing all waypoints stored at the time
+        this method is called.
         """
 
         def subfunc(wp):
@@ -541,15 +545,16 @@ class WP(object):
         print tbl.table + '\n'
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Waypoint Parameter Handling                                                               -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Waypoint Parameter Handling                                           -
+    # -------------------------------------------------------------------------
 
 
     def __setParam(self, param, unit, default, allowed):
 
         """
-        Check a given parameter for the associated unit and excecute unit conversion if neccessary.
+        Check a given parameter for the associated unit and excecute unit
+        conversion if neccessary.
         """
 
         # Check if parameter is set.
@@ -579,15 +584,16 @@ class WP(object):
             return None
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Calculation methods                                                                       -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Calculation methods                                                   -
+    # -------------------------------------------------------------------------
 
 
     def __calculate(self):
         """
-        Perform a series of calculatios to fill gaps in the waypoint list. These can be either
-        artificial values needed for gauge animations or flight data not provides by GPS.
+        Perform a series of calculatios to fill gaps in the waypoint list.
+        These can be either artificial values needed for gauge animations or
+        flight data not provides by GPS.
         """
 
         self.showWPtable()
@@ -603,8 +609,8 @@ class WP(object):
 
     def __convertTimestamp(self, epoch=datetime(1970,1,1)):
         """
-        Convert datetime.datetime timestamps from GPX into video squence timestamps. Video sequence
-        starts at 0 sec.
+        Convert datetime.datetime timestamps from GPX into video squence
+        timestamps. Video sequence starts at 0 sec.
         """
 
         def subfunc(wp, epoch):
@@ -622,7 +628,8 @@ class WP(object):
     def __getDuration(self):
         """
         Get length of frame. Determine time to next frame.
-        This function also adds the length of each GPX frame to the list of track points.
+        This function also adds the length of each GPX frame to the list of
+        track points.
         """
 
         #~ print "GetDuration"
@@ -643,9 +650,9 @@ class WP(object):
 
     def __getNeighbour(self):
         """
-        Iteratre through list of waypoints and get index of both neighbouring waypoints. If it is
-        the first waypoint, set lower neighbour to FIRST and if it is last waypoint set higher
-        neighbour to LAST.
+        Iteratre through list of waypoints and get index of both neighbouring
+        waypoints. If it is the first waypoint, set lower neighbour to FIRST
+        and if it is last waypoint set higher neighbour to LAST.
         """
 
         #~ print("GetNeighbour")
@@ -679,13 +686,14 @@ class WP(object):
         self.__iterWPlist(subfunc, args="H", passIndex=True, writeChange=True)
 
 
-    def __iterWPlist(self, func, args=None, passIndex=False, writeChange=False, ret=False):
+    def __iterWPlist(self, func, args=None, passIndex=False, \
+        writeChange=False, ret=False):
         """
         Iterate through all waypoints an apply func to each one.
-        func expects a function with first parameter to be the given waypoint. Further parameters
-        can be passed as tuple or dict in args.
-        If 'writeChange' is True func is expected to return a tuple (key, value) for the parameter
-        to be written
+        func expects a function with first parameter to be the given waypoint.
+        Further parameters can be passed as tuple or dict in args.
+        If 'writeChange' is True func is expected to return a tuple (key, value)
+        for the parameter to be written
         """
 
         retL = []   # List for return values
@@ -740,8 +748,8 @@ class WP(object):
 
     def __orderByParam(self, param):
         """
-        Order list of waypoints by a given dict key. The waypoint dicts themself remain untouched
-        but their order within the list will be altered.
+        Order list of waypoints by a given dict key. The waypoint dicts themself
+        remain untouched but their order within the list will be altered.
         """
 
         self.WPlist = sorted(self.WPlist, key=itemgetter(param))
@@ -759,12 +767,13 @@ class WP(object):
                 ts = ts - ref
                 return ('timestamp', ts)
 
-        # Check if waypoints are in order. Don't check by which parameter they were ordered.
-        # If unordered, order by timestamp.
+        # Check if waypoints are in order. Don't check by which parameter they
+        # were ordered. If unordered, order by timestamp.
         if not self.__listOrdered:
             self.__orderByParam('timestamp')
 
-        # Get unix timestamp of first waypoint as reference. This is done only once.
+        # Get unix timestamp of first waypoint as reference. This is done only
+        # once.
         if self.__refTimestamp is None:
             self.__refTimestamp = self.getWP(0, 'index')['timestamp']
 

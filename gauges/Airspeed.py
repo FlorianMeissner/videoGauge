@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
-# *************************************************************************************************
-# * Airspeed Indicator Luscombe Style MPH                                                         *
-# *************************************************************************************************
+# *****************************************************************************
+# * Airspeed Indicator Luscombe Style MPH                                     *
+# *****************************************************************************
 
 
 # Description
 # ===========
 
-# Airspeed indicator in old Luscombe style for Video Gauge Creator. Indicating in MPH.
+# Airspeed indicator in old Luscombe style for Video Gauge Creator. Indicating
+# in MPH.
 
 
 # TODO
@@ -35,7 +36,7 @@
 #       - Rework interfaces to better split between gauge class
 
 
-###################################################################################################
+###############################################################################
 
 
 # Gauge modules
@@ -51,7 +52,8 @@ import moviepy.editor       as mpy
 
 class Airspeed(BaseGauge.AbstractBaseGauge):
 
-    def __init__(self, points, wpInst, unit, digSpeed=False, autorun=False, settings=None):
+    def __init__(self, points, wpInst, unit, digSpeed=False, autorun=False, \
+        settings=None):
 
         # Variables used in base class, too.
         self._Unit = unit.lower()
@@ -61,22 +63,23 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         super(self.__class__, self).__init__()
 
         # Variables
-        self._DigSpeed  =   digSpeed    # Show digital speed number in upper left corner.
+        self._DigSpeed  =   digSpeed    # Show digital speed number in upper
+                                        # left corner.
         self._Settings  =   settings    # Video settings
-        self._Speeds    =   []          # List with speeds from track point list. Populated by
-                                        # self.__convert().
+        self._Speeds    =   []          # List with speeds from track point
+                                        # list. Populated by self.__convert().
 
 
-        # If autorun is enabled, video animation will be written to disk immediately after gathering
-        # all data.
+        # If autorun is enabled, video animation will be written to disk
+        # immediately after gathering all data.
         if autorun:
             clip = self.make()
             self.save(clip, "output.mp4")
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Composition                                                                               -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Composition                                                           -
+    # -------------------------------------------------------------------------
 
     def make(self):
         """
@@ -124,9 +127,9 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
                              preset=settings['ffmpeg_preset'])
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Digital speeds                                                                            -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Digital speeds                                                        -
+    # -------------------------------------------------------------------------
 
 
     def __show_speed(self):
@@ -158,16 +161,16 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
             self._SpeedClip = mpy.concatenate_videoclips(speedClips)
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Needle                                                                                    -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Needle                                                                -
+    # -------------------------------------------------------------------------
 
 
     def __convert_speed(self, speed):
         """
         Calibrate given speed to turning angle of needle.
-        Convert speed from native GPX m/s to indicators MPH. Then convert into rotating angle for
-        needle.
+        Convert speed from native GPX m/s to indicators MPH. Then convert into
+        rotating angle for needle.
         """
 
         # m/s to MPH
@@ -183,16 +186,17 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
 
     def __parse_speeds(self, pts):
         """
-        Work through list of given track points and filter speed and duration from them. Also
-        convert speeds into rotation angle for needle graphic.
+        Work through list of given track points and filter speed and duration
+        from them. Also convert speeds into rotation angle for needle graphic.
 
-        lookahead() is used because it is mandetory to remember values from last run of the for
-        loop to get angle range to animate.
+        lookahead() is used because it is mandetory to remember values from last
+        run of the for loop to get angle range to animate.
         """
 
         for pt in lookahead(pts):
 
-            # Last value will be not tuple. Scip because it has no following point.
+            # Last value will be not tuple. Skip because it has no following
+            # point.
             if type(pt) is tuple:
                 duration  = pt[0]['length']
                 speedFrom = self.__convert_speed(pt[0]['speed'])

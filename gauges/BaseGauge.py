@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
-# *************************************************************************************************
-# * Base class for Gauges                                                                         *
-# *************************************************************************************************
+# *****************************************************************************
+# * Base class for Gauges                                                     *
+# *****************************************************************************
 
 
 # Description
 # ===========
 
-# Base class for gauges used for Video Gauge Creator. This class defines methods common to all
-# gauges. Specific methods for each gauge will be in the according file of this directory.
-# (E.g. Airspeed.py)
+# Base class for gauges used for Video Gauge Creator. This class defines methods
+# common to all gauges. Specific methods for each gauge will be in the according
+# file of this directory. (E.g. Airspeed.py)
 
 
 # TODO
@@ -36,7 +36,7 @@
 # 0.2:  - Make class abstract
 
 
-###################################################################################################
+###############################################################################
 
 
 # Own libraries
@@ -75,9 +75,9 @@ class AbstractBaseGauge(object):
         self._Needles = []
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Background color (blue wall)                                                              -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Background color (blue wall)                                          -
+    # -------------------------------------------------------------------------
 
 
     def _create_background(self):
@@ -97,9 +97,9 @@ class AbstractBaseGauge(object):
         self._BgColor = (r, g, b)
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Composition                                                                               -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Composition                                                           -
+    # -------------------------------------------------------------------------
 
 
     def _addDuration(self, t):
@@ -120,9 +120,9 @@ class AbstractBaseGauge(object):
     """
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Faceplate                                                                                 -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Faceplate                                                             -
+    # -------------------------------------------------------------------------
 
 
     def _create_faceplate_clip(self):
@@ -146,13 +146,14 @@ class AbstractBaseGauge(object):
             self._Size = im.size
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Initializers                                                                              -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Initializers                                                          -
+    # -------------------------------------------------------------------------
 
     def __parse_unit(self):
         """
-        Parse unit string given to this class and select proper graphics and functions.
+        Parse unit string given to this class and select proper graphics and
+        functions.
         """
 
         unit = self._Unit
@@ -163,7 +164,8 @@ class AbstractBaseGauge(object):
         self.setFaceplate(prefix + "faceplate.png")
 
         # Get calibration table.
-        # self.calibrator will hold the imported module named like the passed unit.
+        # self.calibrator will hold the imported module named like the passed
+        # unit.
         if self._Child is None:
             raise AbstractImplementationRequired("self._Child")
 
@@ -172,14 +174,15 @@ class AbstractBaseGauge(object):
         self._Gauge_script = getattr(module, unit)
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Needle                                                                                    -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Needle                                                                -
+    # -------------------------------------------------------------------------
 
     def __animateNeedleRotation(self, aFrom, aTo, dur):
         """
-        Animate rotation of the needle over a given timeframe. This method should only be called
-        from s_rotate_needle(). It wrties the rusulting animation directly to self.Needles.
+        Animate rotation of the needle over a given timeframe. This method
+        should only be called from s_rotate_needle(). It wrties the rusulting
+        animation directly to self.Needles.
         """
 
         # Get base needle instance and set duration for animation.
@@ -187,8 +190,8 @@ class AbstractBaseGauge(object):
 
         # Calculate rotation angle. (Way to go)
         # Calculation is valid for 1 sec. So divide by duration of animation.
-        # Using starting point first in the subtraction results in negative delta values if
-        # needle should show rise.
+        # Using starting point first in the subtraction results in negative
+        # delta values if needle should show rise.
         delta = (aFrom - aTo) / dur
 
         #~ print(aFrom, aTo, delta, dur, self.Duration)
@@ -224,8 +227,8 @@ class AbstractBaseGauge(object):
         if speed in calibration:
             return calibration[speed]
 
-        # If value is unknown, calculate intermittent one from linear equation between known neighbours
-        # of calibration table.
+        # If value is unknown, calculate intermittent one from linear equation
+        # between known neighbours of calibration table.
         else:
             # Get neighbours of requested value.
             lowerNeighbour = 0
@@ -253,7 +256,8 @@ class AbstractBaseGauge(object):
 
     def _concate_needles(self):
         """
-        Create video containing all needle positions after another with respective length.
+        Create video containing all needle positions after another with
+        respective length.
         """
 
         self._NeedleClip = mpy.concatenate_videoclips(self._Needles, method="compose", bg_color=None)
@@ -268,8 +272,8 @@ class AbstractBaseGauge(object):
         for v in values:
             angleFrom = v['angleFrom']
 
-            # Don't move needle on last trackpoint because there is no next point known to calculate
-            # rotation angle from.
+            # Don't move needle on last trackpoint because there is no next
+            # point known to calculate rotation angle from.
             key = values.index(v)
             if key == len(values) - 1:
                 angleTo = angleFrom
@@ -285,7 +289,8 @@ class AbstractBaseGauge(object):
 
     def setNeedle(self, path):
         """
-        Set base image containing the needle and convert it to be processed further.
+        Set base image containing the needle and convert it to be processed
+        further.
         """
 
         self.BaseNeedle = mpy.ImageClip(path)

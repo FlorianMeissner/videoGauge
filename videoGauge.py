@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
-# *************************************************************************************************
-# * Video Gauge Creator                                                                           *
-# *************************************************************************************************
+# *****************************************************************************
+# * Video Gauge Creator                                                       *
+# *****************************************************************************
 
 
 # Description
 # ===========
 
-# Video Gauge Creator is build to enhance aviation videos by overlaying them with mock up gauges
-# showing several airplane parameters. Therefore the software expects a GPX file containing GPS data
-# to the flight. It outputs an MP4 video stream of the hole duration of the GPX track containing
-# the configured gauges on a transparent background show the data of the GPX file. More gauges will
-# be added in the future.
+# Video Gauge Creator is build to enhance aviation videos by overlaying them
+# with mock up gauges showing several airplane parameters. Therefore the
+# software expects a GPX file containing GPS data to the flight. It outputs an
+# MP4 video stream of the hole duration of the GPX track containing the
+# configured gauges on a transparent background show the data of the GPX file.
+# More gauges will be added in the future.
 
 
 # TODO
@@ -49,7 +50,7 @@
 #       - Switched gpxpy from local lib to pypi.
 
 
-###################################################################################################
+###############################################################################
 
 
 # Gauge modules
@@ -174,15 +175,16 @@ class VideoGauge(object):
         self._setLogFormat()
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Parameter handling                                                                        -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Parameter handling                                                    -
+    # -------------------------------------------------------------------------
 
 
     def _getCmdParams(self):
         """
-        Get all commandline parameters. Function holds a list of default values for each parameter
-        which will be overridden by command line. Required parameters hold default value "None".
+        Get all commandline parameters. Function holds a list of default values
+        for each parameter which will be overridden by command line. Required
+        parameters hold default value "None".
         """
 
         # Set Default parameters.
@@ -246,7 +248,8 @@ class VideoGauge(object):
 
 
 
-        # Define string with short options. Colon used when parameter is expected.
+        # Define string with short options. Colon used when parameter is
+        # expected.
         options  = ""
         options += "h"  # Display help
         options += "g:" # Input GPX file
@@ -298,7 +301,8 @@ class VideoGauge(object):
                         "vsi-outputfile="
                        ]
 
-        # Parse arguemnts. "opts" contains recognised parameters. "args" contains unrecognized ones.
+        # Parse arguemnts. "opts" contains recognised parameters. "args"
+        # contains unrecognized ones.
         try:
             opts, args = getopt.getopt(sys.argv[1:], options, long_options)
         except getopt.GetoptError as err:
@@ -432,8 +436,8 @@ class VideoGauge(object):
 
     def _chkMissingParams(self):
         """
-        Check for missing but required parameters from the command line.  A missing parameter is
-        expected to hold default value "None".
+        Check for missing but required parameters from the command line. A
+        missing parameter is expected to hold default value "None".
         """
 
         count = 0
@@ -497,9 +501,9 @@ class VideoGauge(object):
             log.warning("No gauge selected and no output produced!")
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Help text                                                                                 -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Help text                                                             -
+    # -------------------------------------------------------------------------
 
 
     def _displayHelp(self):
@@ -513,9 +517,9 @@ class VideoGauge(object):
             self.__exit()
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - GPX                                                                                       -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - GPX                                                                   -
+    # -------------------------------------------------------------------------
 
 
     def _readGPX(self):
@@ -524,11 +528,16 @@ class VideoGauge(object):
         """
 
         gpxfile = open(self.params['gpxfile'], 'r')
-        gpx = gpxpy.parse(gpxfile, version='1.0')   # Even though that SkyDemon marks its GPX files
-                                                    # as version 1.1, the trackpoints do include
-                                                    # <speed></speed> which is only available in
-                                                    # V1.0. Because GPXPy would parse the files
-                                                    # header, it need to be forced to read in 1.0.
+        gpx = gpxpy.parse(gpxfile, version='1.0')   # Even though that SkyDemon
+                                                    # marks its GPX files as
+                                                    # version 1.1, the
+                                                    # trackpoints do include
+                                                    # <speed></speed> which is
+                                                    # only available in V1.0.
+                                                    # Because GPXPy would parse
+                                                    # the files header, it need
+                                                    # to be forced to read in
+                                                    # 1.0.
         self.trkPts = []
 
         # Construct Waypoit class
@@ -553,9 +562,9 @@ class VideoGauge(object):
                     )
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Call of gauge classes                                                                     -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Call of gauge classes                                                 -
+    # -------------------------------------------------------------------------
 
 
     def _airspeed(self):
@@ -635,9 +644,9 @@ class VideoGauge(object):
         log.warning("Vertical speed indicator will be added later!")
 
 
-    # ---------------------------------------------------------------------------------------------
-    # - Other stuff                                                                               -
-    # ---------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # - Other stuff                                                           -
+    # -------------------------------------------------------------------------
 
 
     def __output_folder(self):
@@ -667,9 +676,9 @@ class VideoGauge(object):
 
 
 
-# *************************************************************************************************
-# * Run app                                                                                       *
-# *************************************************************************************************
+# *****************************************************************************
+# * Run app                                                                   *
+# *****************************************************************************
 
 if __name__ == "__main__":
     try:
