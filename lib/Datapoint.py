@@ -271,82 +271,180 @@ class WP(object):
         self.__calculate()
 
 
-    def changeWP(self, ident, altitude=None, duration=None, g=None, heading=None, lat=None, \
-        lon=None, pitch=None, qnh=None, roll=None, speed=None, time=None, timestamp=None, \
-        vsi=None, windDir=None, windSpd=None, lowerNeighbour=None, higherNeighbour=None):
+    def changeWP(self, ident, \
+        altitude        =   None,   altitude_unit   =   DEFAULT_U_ALTITUDE, \
+        duration        =   None,   duration_unit   =   DEFAULT_U_DURATION, \
+        g               =   None, \
+        heading         =   None,   heading_unit    =   DEFAULT_U_HEADING, \
+        lat             =   None,   lat_unit        =   DEFAULT_U_LAT, \
+        lon             =   None,   lon_unit        =   DEFAULT_U_LON, \
+        pitch           =   None,   pitch_unit      =   DEFAULT_U_PITCH, \
+        qnh             =   None,   qnh_unit        =   DEFAULT_U_QNH, \
+        roll            =   None,   roll_unit       =   DEFAULT_U_ROLL, \
+        speed           =   None,   speed_unit      =   DEFAULT_U_SPEED, \
+        time            =   None, \
+        timestamp       =   None,   timestamp_unit  =   DEFAULT_U_TIMESTAMP, \
+        vsi             =   None,   vsi_unit        =   DEFAULT_U_VSI, \
+        windDir         =   None,   windDir_unit    =   DEFAULT_U_WINDDIR, \
+        windSpd         =   None,   windSpd_unit    =   DEFAULT_U_WINDSPD, \
+        lowerNeighbour  =   None, \
+        higherNeighbour =   None):
 
-        changedSomething = False
+        """
+        Change the given parameters of a waypoint identified by its list index in ident.
+        """
 
+        # Check if at least one parameters has been set.
+        params = (altitude, duration, g, heading, lat, lon, pitch, qnh, roll, speed, time, \
+            timestamp, vsi, windDir, windSpd, lowerNeighbour, higherNeighbour)
+
+        if all(v is None for v in params):
+            raise ValueError("Specify at least one parameter to add a new waypoint.")
+
+        altitude = self.__setParam(
+            altitude,
+            altitude_unit,
+            self.DEFAULT_U_ALTITUDE,
+            self.U_ALTITUDE
+        )
         if altitude is not None:
             self.WPlist[ident]['altitude'] = altitude
-            changedSomething = True
 
+        duration = self.__setParam(
+            duration,
+            duration_unit,
+            self.DEFAULT_U_DURATION,
+            self.U_DURATION
+        )
         if duration is not None:
             self.WPlist[ident]['duration'] = duration
-            changedSomething = True
 
+        """
+        g = self.__setParam(
+            g,
+            g_unit,
+            self.DEFAULT_U_G,
+            self.U_G
+        )
+        """
         if g is not None:
             self.WPlist[ident]['g'] = g
-            changedSomething = True
 
+        heading = self.__setParam(
+            heading,
+            heading_unit,
+            self.DEFAULT_U_HEADING,
+            self.U_HEADING
+        )
         if heading is not None:
             self.WPlist[ident]['heading'] = heading
-            changedSomething = True
 
+        lat = self.__setParam(
+            lat,
+            lat_unit,
+            self.DEFAULT_U_LAT,
+            self.U_LAT
+        )
         if lat is not None:
             self.WPlist[ident]['lat'] = lat
-            changedSomething = True
 
+        lon = self.__setParam(
+            lon,
+            lon_unit,
+            self.DEFAULT_U_LON,
+            self.U_LON
+        )
         if lon is not None:
             self.WPlist[ident]['lon'] = lon
-            changedSomething = True
 
+        pitch = self.__setParam(
+            pitch,
+            pitch_unit,
+            self.DEFAULT_U_PITCH,
+            self.U_PITCH
+        )
         if pitch is not None:
             self.WPlist[ident]['pitch'] = pitch
-            changedSomething = True
 
+        qnh = self.__setParam(
+            qnh,
+            qnh_unit,
+            self.DEFAULT_U_QNH,
+            self.U_QNH
+        )
         if qnh is not None:
             self.WPlist[ident]['qnh'] = qnh
-            changedSomething = True
 
+        roll = self.__setParam(
+            roll,
+            roll_unit,
+            self.DEFAULT_U_ROLL,
+            self.U_ROLL
+        )
         if roll is not None:
             self.WPlist[ident]['roll'] = roll
-            changedSomething = True
 
+        speed = self.__setParam(
+            speed,
+            speed_unit,
+            self.DEFAULT_U_SPEED,
+            self.U_SPEED
+        )
         if speed is not None:
             self.WPlist[ident]['speed'] = speed
-            changedSomething = True
 
+        """
+        time = self.__setParam(
+            time,
+            time_unit,
+            self.DEFAULT_U_TIME,
+            self.U_TIME
+        )
+        """
         if time is not None:
             self.WPlist[ident]['time'] = time
-            changedSomething = True
 
+        timestamp = self.__setParam(
+            timestamp,
+            timestamp_unit,
+            self.DEFAULT_U_TIMESTAMP,
+            self.U_TIMESTAMP
+        )
         if timestamp is not None:
             self.WPlist[ident]['timestamp'] = timestamp
-            changedSomething = True
 
+        vsi = self.__setParam(
+            vsi,
+            vsi_unit,
+            self.DEFAULT_U_VSI,
+            self.U_VSI
+        )
         if vsi is not None:
             self.WPlist[ident]['vsi'] = vsi
-            changedSomething = True
 
+        windDir = self.__setParam(
+            windDir,
+            windDir_unit,
+            self.DEFAULT_U_WINDDIR,
+            self.U_WINDDIR
+        )
         if windDir is not None:
             self.WPlist[ident]['windDir'] = windDir
-            changedSomething = True
 
+        windSpd = self.__setParam(
+            windSpd,
+            windSpd_unit,
+            self.DEFAULT_U_WINDSPD,
+            self.U_WINDSPD
+        )
         if windSpd is not None:
             self.WPlist[ident]['windSpd'] = windSpd
-            changedSomething = True
 
         if lowerNeighbour is not None:
             self.WPlist[ident]['lowerNeighbour'] = lowerNeighbour
-            changedSomething = True
 
         if higherNeighbour is not None:
             self.WPlist[ident]['higherNeighbour'] = higherNeighbour
-            changedSomething = True
-
-        if not changedSomething:
-            raise ValueError("At least one parameter must be specified!")
 
         # Perfom gap filling calculations.
         self.__listOrdered = False
