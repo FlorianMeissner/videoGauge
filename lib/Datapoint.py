@@ -37,8 +37,7 @@
 
 
 # own libraries
-from lib.calculations.conversions import *
-import lib.calculations.conversions
+import lib.calculations.av_conv
 
 # foreign libraries
 from datetime import datetime
@@ -547,7 +546,7 @@ class WP(object):
     # ---------------------------------------------------------------------------------------------
 
 
-    def __setParam(self, param, unit, default, allowed, index=None):
+    def __setParam(self, param, unit, default, allowed):
 
         """
         Check a given parameter for the associated unit and excecute unit conversion if neccessary.
@@ -572,7 +571,7 @@ class WP(object):
                     for u in allowed:
                         if unit == u:
                             funcName = "%s2%s" % (unit, default)
-                            func = getattr(lib.calculations.conversions, funcName)
+                            func = getattr(lib.calculations.av_conv, funcName)
                             return func(param)
 
         # Return None for unset parameter. Just to return something as the params already holds None.

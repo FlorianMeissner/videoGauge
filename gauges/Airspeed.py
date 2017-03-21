@@ -42,7 +42,7 @@
 import BaseGauge
 
 # Own library modules
-from lib.calculations       import conversions
+from lib.calculations       import av_conv
 from lib.myMisc             import lookahead
 
 # Foreign libraries

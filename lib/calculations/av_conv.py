@@ -22,21 +22,26 @@
 
 # Creator:  Florian Meissner
 #           n1990b@gmx.de
-# Version:  0.1
-# Date:     2017/02/21
+# Version:  1.0
+# Date:     2017/03/21
 
 
 # VERSION HISTORY
 # ===============
 
 # 0.1:  Initial Beta
+# 1.0:  Restructured, added new conversions.
 
 
 ###################################################################################################
 
 
-# Speed
-# =====
+# -------------------------------------------------------------------------------------------------
+# - Speed                                                                                         -
+# -------------------------------------------------------------------------------------------------
+
+
+# Meter per second
 
 def ms2kmh(ms):
     ms = float(ms)
@@ -66,6 +71,8 @@ def ms2ftmin(ms):
     return ftmin
 
 
+# Kilometer per hour
+
 def kmh2ms(kmh):
     kmh = float(kmh)
     mh = kmh * 1000
@@ -86,8 +93,12 @@ def kmh2kt(kmh):
 
 
 def kmh2ftmin(kmh):
-    pass
+    kmh = float(kmh)
+    ftmin = kmh * 54.680666664
+    return ftmin
 
+
+# Miles per hour
 
 def mph2ms(mph):
     mph = float(mph)
@@ -109,8 +120,12 @@ def mph2kt(mph):
 
 
 def mph2ftmin(mph):
-    pass
+    mph = float(mph)
+    ftmin = mph * 88.000014306
+    return ftmin
 
+
+# Knots
 
 def kt2ms(kt):
     kt = float(kt)
@@ -132,8 +147,12 @@ def kt2mph(kt):
 
 
 def kt2ftmin(kt):
-    pass
+    kt = float(kt)
+    ftmin = 101.268568224
+    return ftmin
 
+
+# Feet per minute
 
 def ftmin2ms(ftmin):
     ftmin = float(ftmin)
@@ -143,19 +162,26 @@ def ftmin2ms(ftmin):
 
 
 def ftmin2kmh(ftmin):
-    pass
+    ftmin = float(ftmin)
+    kmh = ftmin * 0.018288
+    return kmh
 
 
 def ftmin2mph(ftmin):
-    pass
+    ftmin = float(ftmin)
+    mph = ftmin * 0.0113636
+    return mph
 
 
 def ftmin2kt(ftmin):
-    pass
+    ftmin = float(ftmin)
+    kt = ftmin * 0.00987473
+    return kt
 
 
-# Altitude
-# ========
+# -------------------------------------------------------------------------------------------------
+# - Altitude                                                                                      -
+# -------------------------------------------------------------------------------------------------
 
 def ft2m(ft):
     ft = float(ft)
@@ -169,38 +195,20 @@ def m2ft(m):
     return ft
 
 
-# Air pressure
-# ============
+# -------------------------------------------------------------------------------------------------
+# - Air Pressure                                                                                  -
+# -------------------------------------------------------------------------------------------------
 
 def inhg2hpa(inhg):
-    pass
+    inhg = float(inhg)
+    hpa = inhg * 33.8638866667
+    return hpa
 
 
 def hpa2inhg(hpa):
-    pass
-
-
-# Color
-# =====
-
-def colorHex2RGB(hexstr):
-    hexstr = hexstr.strip("#")
-    lv = len(hexstr)
-    return tuple(int(hexstr[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
-
-
-def colorRGB2Hex(r, g, b):
-    return '#%02x%02x%02x' % (r, g, b)
-
-
-
-# Coordinates
-# ===========
-
-# Spilt coordinate string by 'x' inthe middle into tuple. E.g. '1280x720' -> '(1280, 720)'
-def splitXY(string):
-    x, y = string.split('x')
-    return (int(x), int(y))
+    hpa = float(hpa)
+    inhg = hpa / 33.8638866667
+    return inhg
 
 
 # EOF

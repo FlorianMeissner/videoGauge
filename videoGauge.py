@@ -56,15 +56,15 @@
 import gauges
 
 # Own libraries
-from lib.calculations.conversions   import colorHex2RGB, splitXY
-from lib.Datapoint                  import WP
-from lib.myMisc                     import basePath
-from lib.terminalSize               import getTerminalSize
+from lib.calculations.gui_conv  import colorHex2RGB, splitXY
+from lib.Datapoint              import WP
+from lib.myMisc                 import basePath
+from lib.terminalSize           import getTerminalSize
 
 # Foreign libraries
 import getopt
 import gpxpy
-import logging                      as log
+import logging                  as log
 import os
 import shutil
 import sys

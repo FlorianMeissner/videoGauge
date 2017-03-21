@@ -40,7 +40,7 @@
 
 
 # Own libraries
-from lib.calculations   import conversions, interpolation, triangulation
+from lib.calculations   import av_conv, interpolation, triangulation
 from lib.Exceptions     import *
 from lib.myMisc         import basePath
 
