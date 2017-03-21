@@ -542,11 +542,12 @@ class WP(object):
             line.append("%s" % wp['duration'])
             line.append("%s" % wp['heading'])
             line.append("%s" % wp['distance'])
+            line.append("%s" % wp['vsi'])
             return line
 
         # Prepare table head
         rows = []
-        rows.append(['Lat', 'Lon', 'Alt', 'Spd', 'Time', 'Ts', 'Nb', 'Dur', 'HDG', 'Dist'])
+        rows.append(['Lat', 'Lon', 'Alt', 'Spd', 'Time', 'Ts', 'Nb', 'Dur', 'HDG', 'Dist', 'vsi'])
 
         # Parse returned lines. If thereis more then one line, the returned list containes
         # additional listes and needs to be itterated threw.
@@ -629,6 +630,7 @@ class WP(object):
             self.__getDuration()
             self.__getBearing()
             self.__getDistance()
+            self.__getVSI()
             self.__listCalculated = True
 
 
@@ -752,6 +754,27 @@ class WP(object):
 
         self.__iterWPlist(subfunc, args="L", passIndex=True, writeChange=True)
         self.__iterWPlist(subfunc, args="H", passIndex=True, writeChange=True)
+
+
+    def __getVSI(self):
+        """
+        Calculate vertical speed.
+        """
+
+        def subfunc(wp):
+            if wp['higherNeighbour'] == "LAST":
+                vsi = 0.0
+            elif wp['duration'] == 0:
+                vsi = 0.0
+            else:
+                alt = wp['altitude']
+                nextAlt = self.getWP(wp['higherNeighbour'], 'index')['altitude']
+                vsi = (nextAlt - alt) / wp['duration'] # ft/sec
+                vsi = vsi * 60
+            if wp['vsi'] != vsi:
+                return ('vsi', vsi)
+
+        self.__iterWPlist(subfunc, writeChange=True)
 
 
     def __iterWPlist(self, func, args=None, passIndex=False, \

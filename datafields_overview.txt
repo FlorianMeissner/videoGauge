@@ -4,7 +4,7 @@ Datafields Overview
    Field    |  Source   | Grade of implementation
 ------------+-----------+------------------------
 altitude    | GPX       | complete
-distance    | Calc      | implemented
+distance    | Calc      | complete
 duration    | Calc      | complete
 g           | Sensor    | open
 heading     | Calc      | complete
@@ -16,6 +16,6 @@ roll        | Sensor    | open
 speed       | GPX       | complete
 time        | GPX       | complete
 timestamp   | Calc      | complete
-vsi         | Calc      | open
+vsi         | Calc      | complete
 windDir     | Sensor    | open
 windSpd     | Sensor    | open
