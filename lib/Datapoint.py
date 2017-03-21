@@ -38,6 +38,7 @@
 
 # own libraries
 from lib.calculations.conversions import *
+import lib.calculations.conversions
 
 # foreign libraries
 from datetime import datetime
@@ -51,19 +52,19 @@ class WP(object):
     WPlist = []
 
     # Units
-    U_DEG   = "degrees"
-    U_FT    = "feet"
-    U_FTMIN = "feet per minute"
-    U_HPA   = "hectopascal"
-    U_HR    = "hours"
-    U_INHG  = "inch mercury"
-    U_MPH   = "statute miles per hour"
-    U_KMH   = "kilometers per second"
-    U_KT    = "knots (nautical miles per hour)"
-    U_M     = "meters"
-    U_MIN   = "minutes"
-    U_MS    = "meters per second"
-    U_SEC   = "seconds"
+    U_DEG   = "deg"
+    U_FT    = "ft"
+    U_FTMIN = "ftmin"
+    U_HPA   = "hpa"
+    U_HR    = "h"
+    U_INHG  = "inhg"
+    U_MPH   = "mph"
+    U_KMH   = "kmh"
+    U_KT    = "kt"
+    U_M     = "m"
+    U_MIN   = "min"
+    U_MS    = "ms"
+    U_SEC   = "sec"
 
     # Defaults
     DEFAULT_U_ALTITUDE  =   U_FT
@@ -92,7 +93,7 @@ class WP(object):
     U_PITCH = (U_DEG)
     U_QNH = (U_INHG, U_HPA)
     U_ROLL = (U_DEG)
-    U_SPEED = (U_KT, U_MPH, U_KMH)
+    U_SPEED = (U_KT, U_MPH, U_KMH, U_MS)
     #~ U_TIME = ()
     U_TIMESTAMP = (U_SEC)
     U_VSI = (U_FTMIN, U_MS)
@@ -136,109 +137,108 @@ class WP(object):
         Add waypoint to list. For a waypoint at least one parameter should be given.
         """
 
-        addedSomething = False
+        # Check if at least one parameters has been set.
+        params = (altitude, duration, g, heading, lat, lon, pitch, qnh, roll, speed, time, \
+            timestamp, vsi, windDir, windSpd)
 
-        # Check units.
-        if altitude is not None:
-            if altitude_unit not in self.U_ALTITUDE:
-                raise ValueError("Unknown unit for altitude '%s'!" % altitude_unit)
-            elif altitude_unit == self.U_M:
-                altitude = m2ft(altitude)
-            addedSomething = True
+        if all(v is None for v in params):
+            raise ValueError("Specify at least one parameter to add a new waypoint.")
 
-        if duration is not None:
-            if duration_unit not in self.U_DURATION:
-                raise ValueError("Unknown unit for duration '%s'!" % duration_unit)
-            elif duration_unit == self.U_MIN:
-                duration = duration * 60
-            elif duration_unit == self.U_HR:
-                duration = duration * 3600
-            addedSomething = True
-
-        if g is not None:
-            """
-            if ge_unit not in self.U_G:
-                raise ValueError("Unknown unit for g '%s'!" % g_unit)
-            """
-            addedSomething = True
-
-        if heading is not None:
-            if heading_unit not in self.U_HEADING:
-                raise ValueError("Unknown unit for heading '%s'!" % heading_unit)
-            addedSomething = True
-
-        if lat is not None:
-            if lat_unit not in self.U_LAT:
-                raise ValueError("Unknown unit for lat '%s'!" % lat_unit)
-            addedSomething = True
-
-        if lon is not None:
-            if lon_unit not in self.U_LON:
-                raise ValueError("Unknown unit for lon '%s'!" % lon_unit)
-            addedSomething = True
-
-        if pitch is not None:
-            if pitch_unit not in self.U_PITCH:
-                raise ValueError("Unknown unit for pitch '%s'!" % pitch_unit)
-            addedSomething = True
-
-        if qnh is not None:
-            if qnh_unit not in self.U_QNH:
-                raise ValueError("Unknown unit for qnh '%s'!" % qnh_unit)
-            elif qnh_unit == self.U_INHG:
-                altitude = inhg2hpa(qnh)
-            addedSomething = True
-
-        if roll is not None:
-            if roll_unit not in self.U_ROLL:
-                raise ValueError("Unknown unit for roll '%s'!" % roll_unit)
-            addedSomething = True
-
-        if speed is not None:
-            if speed_unit not in self.U_SPEED:
-                raise ValueError("Unknown unit for speed '%s'!" % speed_unit)
-            elif speed_unit == self.U_MPH:
-                speed = mph2kt(speed)
-            elif speed_unit == self.U_KMH:
-                speed = kmh2kt(speed)
-            addedSomething = True
-
-        if time is not None:
-            """
-            if time_unit not in self.U_TIME:
-                raise ValueError("Unknown unit for time '%s'!" % time_unit)
-            """
-            addedSomething = True
-
-        if timestamp is not None:
-            if timestamp_unit not in self.U_TIMESTAMP:
-                raise ValueError("Unknown unit for timestamp '%s'!" % timestamp_unit)
-            addedSomething = True
-
-        if vsi is not None:
-            if vsi_unit not in self.U_VSI:
-                raise ValueError("Unknown unit for vsi '%s'!" % vsi_unit)
-            elif vsi_unit == self.U_MS:
-                vsi = ms2ftmin(vsi)
-            addedSomething = True
-
-        if windDir is not None:
-            if windDir_unit not in self.U_WINDDIR:
-                raise ValueError("Unknown unit for windDir '%s'!" % windDir_unit)
-            addedSomething = True
-
-        if windSpd is not None:
-            if windSpd_unit not in self.U_WINDSPD:
-                raise ValueError("Unknown unit for windSpd '%s'!" % windSpd_unit)
-            elif windSpd_unit == self.U_MPH:
-                windSpd = mph2kt(windSpd)
-            elif windSpd_unit == self.U_KMH:
-                windSpd = kmh2kt(windSpd)
-            elif windSpd_unit == self.U_FTMIN:
-                windSpd = ftmin2kt(windSpd)
-            elif windSpd_unit == self.U_MS:
-                windSpd = ms2kt(windSpd)
-            addedSomething = True
+        # Parse units and convert values if neccessary.
+        altitude = self.__setParam(
+            altitude,
+            altitude_unit,
+            self.DEFAULT_U_ALTITUDE,
+            self.U_ALTITUDE
+        )
+        duration = self.__setParam(
+            duration,
+            duration_unit,
+            self.DEFAULT_U_DURATION,
+            self.U_DURATION
+        )
+        """
+        g = self.__setParam(
+            g,
+            g_unit,
+            self.DEFAULT_U_G,
+            self.U_G
+        )
+        """
+        heading = self.__setParam(
+            heading,
+            heading_unit,
+            self.DEFAULT_U_HEADING,
+            self.U_HEADING
+        )
+        lat = self.__setParam(
+            lat,
+            lat_unit,
+            self.DEFAULT_U_LAT,
+            self.U_LAT
+        )
+        lon = self.__setParam(
+            lon,
+            lon_unit,
+            self.DEFAULT_U_LON,
+            self.U_LON
+        )
+        pitch = self.__setParam(
+            pitch,
+            pitch_unit,
+            self.DEFAULT_U_PITCH,
+            self.U_PITCH
+        )
+        qnh = self.__setParam(
+            qnh,
+            qnh_unit,
+            self.DEFAULT_U_QNH,
+            self.U_QNH
+        )
+        roll = self.__setParam(
+            roll,
+            roll_unit,
+            self.DEFAULT_U_ROLL,
+            self.U_ROLL
+        )
+        speed = self.__setParam(
+            speed,
+            speed_unit,
+            self.DEFAULT_U_SPEED,
+            self.U_SPEED
+        )
+        """
+        time = self.__setParam(
+            time,
+            time_unit,
+            self.DEFAULT_U_TIME,
+            self.U_TIME
+        )
+        """
+        timestamp = self.__setParam(
+            timestamp,
+            timestamp_unit,
+            self.DEFAULT_U_TIMESTAMP,
+            self.U_TIMESTAMP
+        )
+        vsi = self.__setParam(
+            vsi,
+            vsi_unit,
+            self.DEFAULT_U_VSI,
+            self.U_VSI
+        )
+        windDir = self.__setParam(
+            windDir,
+            windDir_unit,
+            self.DEFAULT_U_WINDDIR,
+            self.U_WINDDIR
+        )
+        windSpd = self.__setParam(
+            windSpd,
+            windSpd_unit,
+            self.DEFAULT_U_WINDSPD,
+            self.U_WINDSPD
+        )
 
         self.WPlist.append(
             {
@@ -445,6 +445,44 @@ class WP(object):
 
 
     # ---------------------------------------------------------------------------------------------
+    # - Waypoint Parameter Handling                                                               -
+    # ---------------------------------------------------------------------------------------------
+
+
+    def __setParam(self, param, unit, default, allowed, index=None):
+
+        """
+        Check a given parameter for the associated unit and excecute unit conversion if neccessary.
+        """
+
+        # Check if parameter is set.
+        if param is not None:
+
+            # Check if unit is allowed.
+            if unit not in allowed:
+                raise ValueError("Unknown unit '%s'!" % unit)
+
+            else:
+
+                # If unit equals default unit return parameter unchanged.
+                if unit == default:
+                    return param
+
+                else:
+
+                    # Iterate threw allowed units to find matching.
+                    for u in allowed:
+                        if unit == u:
+                            funcName = "%s2%s" % (unit, default)
+                            func = getattr(lib.calculations.conversions, funcName)
+                            return func(param)
+
+        # Return None for unset parameter. Just to return something as the params already holds None.
+        else:
+            return None
+
+
+    # ---------------------------------------------------------------------------------------------
     # - Calculation methods                                                                       -
     # ---------------------------------------------------------------------------------------------
 
@@ -463,7 +501,6 @@ class WP(object):
             self.__videoTimestamp()
             self.__getNeighbour()
             self.__getDuration()
-            #~ self.showWPtable()
             self.__listCalculated = True
 
 

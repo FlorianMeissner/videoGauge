@@ -97,6 +97,7 @@ class VideoGauge(object):
         self.__output_folder()
         self._chkMissingParams()
         self._readGPX()
+        #~ self._wp.changeWP(1, altitude=1000, altitude_unit=self._wp.U_M)
         self._wp.changeWP(1, altitude=1000)
         self._runGauges()
 
@@ -544,10 +545,10 @@ class VideoGauge(object):
                              'time'  : point.time}
                     self.trkPts.append(trkPt)
                     self._wp.addWP(
-                        lat=point.latitude, \
-                        lon=point.longitude, \
+                        lat=point.latitude, lat_unit=self._wp.U_DEG, \
+                        lon=point.longitude, lon_unit=self._wp.U_DEG, \
                         altitude=point.elevation, altitude_unit=self._wp.U_M, \
-                        speed=point.speed, \
+                        speed=point.speed, speed_unit=self._wp.U_MS, \
                         time=point.time
                     )
 
