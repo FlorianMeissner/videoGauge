@@ -1,0 +1,21 @@
+Datafields Overview
+===================
+
+   Field    |  Source   | Grade of implementation
+------------+-----------+------------------------
+altitude    | GPX       | complete
+distance    | Calc      | implemented
+duration    | Calc      | complete
+g           | Sensor    | open
+heading     | Calc      | complete
+lat         | GPX       | complete
+lon         | GPX       | complete
+pitch       | Sensor    | open
+qnh         | Sensor    | open
+roll        | Sensor    | open
+speed       | GPX       | complete
+time        | GPX       | complete
+timestamp   | Calc      | complete
+vsi         | Calc      | open
+windDir     | Sensor    | open
+windSpd     | Sensor    | open

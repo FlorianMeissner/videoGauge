@@ -37,6 +37,7 @@
 
 
 # own libraries
+from lib.calculations.navigation import getBearing, getDistance
 import lib.calculations.av_conv
 
 # foreign libraries
@@ -67,6 +68,7 @@ class WP(object):
 
     # Defaults
     DEFAULT_U_ALTITUDE  =   U_FT
+    DEFAULT_U_DISTANCE  =   U_M
     DEFAULT_U_DURATION  =   U_SEC
     #~ DEFAULT_U_G         =
     DEFAULT_U_HEADING   =   U_DEG
@@ -84,6 +86,7 @@ class WP(object):
 
     # Possible units
     U_ALTITUDE = (U_FT, U_M)
+    U_DISTANCE = (U_FT, U_M)
     U_DURATION = (U_SEC, U_MIN, U_HR)
     #~ U_G = ()
     U_HEADING = (U_DEG)
@@ -117,6 +120,7 @@ class WP(object):
 
     def addWP(self, \
         altitude    =   None,   altitude_unit   =   DEFAULT_U_ALTITUDE, \
+        distance    =   None,   distance_unit   =   DEFAULT_U_DISTANCE, \
         duration    =   None,   duration_unit   =   DEFAULT_U_DURATION, \
         g           =   None, \
         heading     =   None,   heading_unit    =   DEFAULT_U_HEADING, \
@@ -150,6 +154,12 @@ class WP(object):
             altitude_unit,
             self.DEFAULT_U_ALTITUDE,
             self.U_ALTITUDE
+        )
+        distance = self.__setParam(
+            distance,
+            distance_unit,
+            self.DEFAULT_U_DISTANCE,
+            self.U_DISTANCE
         )
         duration = self.__setParam(
             duration,
@@ -244,6 +254,7 @@ class WP(object):
             {
                 # Actual data fields
                 "altitude"  :   altitude,
+                "distance"  :   distance,
                 "duration"  :   duration,
                 "g"         :   g,
                 "heading"   :   heading,
@@ -273,6 +284,7 @@ class WP(object):
 
     def changeWP(self, ident, \
         altitude        =   None,   altitude_unit   =   DEFAULT_U_ALTITUDE, \
+        distance        =   None,   distance_unit   =   DEFAULT_U_DISTANCE, \
         duration        =   None,   duration_unit   =   DEFAULT_U_DURATION, \
         g               =   None, \
         heading         =   None,   heading_unit    =   DEFAULT_U_HEADING, \
@@ -296,7 +308,7 @@ class WP(object):
         """
 
         # Check if at least one parameters has been set.
-        params = (altitude, duration, g, heading, lat, lon, pitch, qnh, roll, speed, time, \
+        params = (altitude, distance, duration, g, heading, lat, lon, pitch, qnh, roll, speed, time, \
             timestamp, vsi, windDir, windSpd, lowerNeighbour, higherNeighbour)
 
         if all(v is None for v in params):
@@ -310,6 +322,15 @@ class WP(object):
         )
         if altitude is not None:
             self.WPlist[ident]['altitude'] = altitude
+
+        distance = self.__setParam(
+            distance,
+            distance_unit,
+            self.DEFAULT_U_DISTANCE,
+            self.U_DISTANCE
+        )
+        if distance is not None:
+            self.WPlist[ident]['distance'] = distance
 
         duration = self.__setParam(
             duration,
@@ -519,11 +540,13 @@ class WP(object):
 
             line.append("%s, %s" % (lNb, hNb))
             line.append("%s" % wp['duration'])
+            line.append("%s" % wp['heading'])
+            line.append("%s" % wp['distance'])
             return line
 
         # Prepare table head
         rows = []
-        rows.append(['Lat', 'Lon', 'Alt', 'Spd', 'Time', 'Ts', 'Nb', 'Dur'])
+        rows.append(['Lat', 'Lon', 'Alt', 'Spd', 'Time', 'Ts', 'Nb', 'Dur', 'HDG', 'Dist'])
 
         # Parse returned lines. If thereis more then one line, the returned list containes
         # additional listes and needs to be itterated threw.
@@ -604,6 +627,8 @@ class WP(object):
             self.__videoTimestamp()
             self.__getNeighbour()
             self.__getDuration()
+            self.__getBearing()
+            self.__getDistance()
             self.__listCalculated = True
 
 
@@ -623,6 +648,49 @@ class WP(object):
                 return ('timestamp', ts)
 
         ret = self.__iterWPlist(subfunc, {'epoch':epoch}, writeChange=True)
+
+
+    def __getBearing(self):
+        """
+        Calculate bearing between waypoints.
+        """
+
+        def subfunc(wp):
+            if wp['higherNeighbour'] == "LAST":
+                if wp['lowerNeighbour'] == "FIRST":
+                    retVal = 0.0
+                else:
+                    retVal = self.getWP(wp['lowerNeighbour'], 'index')['heading']
+            else:
+                nextWP = self.getWP(wp['higherNeighbour'], 'index')
+                wp1 = (wp['lat'], wp['lon'])
+                wp2 = (nextWP['lat'], nextWP['lon'])
+                bearing = getBearing(wp1, wp2)
+                retVal = bearing
+            if wp['heading'] != retVal:
+                return ('heading', retVal)
+
+        self.__iterWPlist(subfunc, writeChange = True)
+
+
+    def __getDistance(self):
+        """
+        Calculate distance between waypoints.
+        """
+
+        def subfunc(wp):
+            if wp['higherNeighbour'] == "LAST":
+                retVal = 0.0
+            else:
+                nextWP = self.getWP(wp['higherNeighbour'], 'index')
+                wp1 = (wp['lat'], wp['lon'])
+                wp2 = (nextWP['lat'], nextWP['lon'])
+                dist = getDistance(wp1, wp2)
+                retVal = dist
+            if wp['distance'] != retVal:
+                return ('distance', retVal)
+
+        self.__iterWPlist(subfunc, writeChange = True)
 
 
     def __getDuration(self):
