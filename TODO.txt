@@ -11,6 +11,7 @@ VIDEO GAUGE CREATOR TODO
 - Create installer script
 - Write readme
 - Create help text
+- Runtime counter
 
 
 Florian Meissner

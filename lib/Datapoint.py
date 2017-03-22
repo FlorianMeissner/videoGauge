@@ -155,18 +155,21 @@ class WP(object):
             self.DEFAULT_U_ALTITUDE,
             self.U_ALTITUDE
         )
+
         distance = self.__setParam(
             distance,
             distance_unit,
             self.DEFAULT_U_DISTANCE,
             self.U_DISTANCE
         )
+
         duration = self.__setParam(
             duration,
             duration_unit,
             self.DEFAULT_U_DURATION,
             self.U_DURATION
         )
+
         """
         g = self.__setParam(
             g,
@@ -175,48 +178,59 @@ class WP(object):
             self.U_G
         )
         """
+
+        if g is None:
+            g = {'x':None, 'y':None, 'z':None}
+
         heading = self.__setParam(
             heading,
             heading_unit,
             self.DEFAULT_U_HEADING,
             self.U_HEADING
         )
+
         lat = self.__setParam(
             lat,
             lat_unit,
             self.DEFAULT_U_LAT,
             self.U_LAT
         )
+
         lon = self.__setParam(
             lon,
             lon_unit,
             self.DEFAULT_U_LON,
             self.U_LON
         )
+
         pitch = self.__setParam(
             pitch,
             pitch_unit,
             self.DEFAULT_U_PITCH,
             self.U_PITCH
         )
+
         qnh = self.__setParam(
             qnh,
             qnh_unit,
             self.DEFAULT_U_QNH,
             self.U_QNH
         )
+
         roll = self.__setParam(
             roll,
             roll_unit,
             self.DEFAULT_U_ROLL,
             self.U_ROLL
         )
+
         speed = self.__setParam(
             speed,
             speed_unit,
             self.DEFAULT_U_SPEED,
             self.U_SPEED
         )
+
         """
         time = self.__setParam(
             time,
@@ -225,18 +239,21 @@ class WP(object):
             self.U_TIME
         )
         """
+
         timestamp = self.__setParam(
             timestamp,
             timestamp_unit,
             self.DEFAULT_U_TIMESTAMP,
             self.U_TIMESTAMP
         )
+
         vsi = self.__setParam(
             vsi,
             vsi_unit,
             self.DEFAULT_U_VSI,
             self.U_VSI
         )
+
         windDir = self.__setParam(
             windDir,
             windDir_unit,
@@ -286,7 +303,7 @@ class WP(object):
         altitude        =   None,   altitude_unit   =   DEFAULT_U_ALTITUDE, \
         distance        =   None,   distance_unit   =   DEFAULT_U_DISTANCE, \
         duration        =   None,   duration_unit   =   DEFAULT_U_DURATION, \
-        g               =   None, \
+        g               =   {'x':None, 'y':None, 'z':None}, \
         heading         =   None,   heading_unit    =   DEFAULT_U_HEADING, \
         lat             =   None,   lat_unit        =   DEFAULT_U_LAT, \
         lon             =   None,   lon_unit        =   DEFAULT_U_LON, \
@@ -349,8 +366,13 @@ class WP(object):
             self.U_G
         )
         """
-        if g is not None:
-            self.WPlist[ident]['g'] = g
+        if g is not None and g != {'x':None, 'y':None, 'z':None}:
+            if g['x'] is not None:
+                self.WPlist[ident]['g']['x'] = g['x']
+            if g['y'] is not None:
+                self.WPlist[ident]['g']['y'] = g['y']
+            if g['z'] is not None:
+                self.WPlist[ident]['g']['z'] = g['z']
 
         heading = self.__setParam(
             heading,
@@ -543,11 +565,19 @@ class WP(object):
             line.append("%s" % wp['heading'])
             line.append("%s" % wp['distance'])
             line.append("%s" % wp['vsi'])
+
+            g = ""
+            for key, value in wp['g'].iteritems():
+                if isinstance(value, float):
+                    g += "%2.3f, " % value
+                else:
+                    g += "%s, " % value
+            line.append(g[:-2])
             return line
 
         # Prepare table head
         rows = []
-        rows.append(['Lat', 'Lon', 'Alt', 'Spd', 'Time', 'Ts', 'Nb', 'Dur', 'HDG', 'Dist', 'vsi'])
+        rows.append(['Lat', 'Lon', 'Alt', 'Spd', 'Time', 'Ts', 'Nb', 'Dur', 'HDG', 'Dist', 'vsi', 'G'])
 
         # Parse returned lines. If thereis more then one line, the returned list containes
         # additional listes and needs to be itterated threw.
@@ -631,6 +661,7 @@ class WP(object):
             self.__getBearing()
             self.__getDistance()
             self.__getVSI()
+            self.__getGforce()
             self.__listCalculated = True
 
 
@@ -669,6 +700,7 @@ class WP(object):
                 wp2 = (nextWP['lat'], nextWP['lon'])
                 bearing = getBearing(wp1, wp2)
                 retVal = bearing
+
             if wp['heading'] != retVal:
                 return ('heading', retVal)
 
@@ -716,6 +748,44 @@ class WP(object):
                     return ('duration', length)
 
         self.__iterWPlist(subfunc, writeChange=True)
+
+
+    def __getGforce(self):
+        """
+        Calculate horizontal and vertical G forces.
+        """
+
+        # a = distance/time^2
+
+        def vertical(wp):
+            if wp['higherNeighbour'] == "LAST":
+                a = 1.0
+            elif wp['duration'] == 0:
+                a = 1.0
+            else:
+                myAlt = wp['altitude']
+                nextAlt = self.getWP(wp['higherNeighbour'], 'index')['altitude']
+                a = (nextAlt - myAlt) / wp['duration']**2
+                a += 1 # Credit to earth gravity
+
+            if wp['g']['z'] != a:
+                return ('g', {'x':None, 'y':None, 'z':a})
+
+        def horizontal(wp):
+            if wp['higherNeighbour'] == "LAST":
+                a = 0.0
+            elif wp['duration'] == 0:
+                a = 0.0
+            else:
+                mySpeed = wp['speed']
+                nextSpeed = self.getWP(wp['higherNeighbour'], 'index')['speed']
+                a = (nextSpeed - mySpeed) / wp['duration']**2
+
+            if wp['g']['x'] != a:
+                return ('g', {'x':a, 'y':None, 'z':None})
+
+        self.__iterWPlist(vertical, writeChange=True)
+        self.__iterWPlist(horizontal, writeChange=True)
 
 
     def __getNeighbour(self):
