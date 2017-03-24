@@ -68,10 +68,10 @@ class AbstractBaseGauge(object):
 
         # Initializer methods
         self.__parse_unit()
+        self._prepare()
 
         # Initializers
         self._BgColor = (0, 0, 255)
-        self._Duration = 0
         self._Needles = []
 
 
@@ -86,7 +86,11 @@ class AbstractBaseGauge(object):
         """
 
         bgSize = int(triangulation.pythagoras(a=self._Size[0], b=self._Size[1]))
-        self._BgClip = mpy.ColorClip(size=(bgSize, bgSize), col=self._BgColor, duration=self._Duration)
+        self._BgClip = mpy.ColorClip(
+            size=(bgSize, bgSize),
+            col=self._BgColor,
+            duration=self._WpInst.getDuration()
+        )
 
 
     def setBackground(self, r, g, b):
@@ -95,29 +99,6 @@ class AbstractBaseGauge(object):
         """
 
         self._BgColor = (r, g, b)
-
-
-    # -------------------------------------------------------------------------
-    # - Composition                                                           -
-    # -------------------------------------------------------------------------
-
-
-    def _addDuration(self, t):
-        """
-        Adds aspecified amound of time to overall clip duration.
-        """
-
-        self._Duration += t
-
-
-    """
-    def setPosition(self, pos):
-        self.position = pos
-
-
-    def setSize(self, w, h):
-        self.size = (w, h)
-    """
 
 
     # -------------------------------------------------------------------------
@@ -131,7 +112,8 @@ class AbstractBaseGauge(object):
         """
 
         self._FaceplateClip = mpy.ImageClip(self._FaceplateImage)
-        self._FaceplateClip = self._FaceplateClip.set_duration(self._Duration)
+        self._FaceplateClip = \
+            self._FaceplateClip.set_duration(self._WpInst.getDuration())
 
 
     def setFaceplate(self, path):
@@ -250,7 +232,6 @@ class AbstractBaseGauge(object):
                                             speed)
 
             # MoviePy uses positive values for counter-clockwise turns.
-            #~ return angle * -1
             return angle
 
 
@@ -260,7 +241,11 @@ class AbstractBaseGauge(object):
         respective length.
         """
 
-        self._NeedleClip = mpy.concatenate_videoclips(self._Needles, method="compose", bg_color=None)
+        self._NeedleClip = mpy.concatenate_videoclips(
+            self._Needles,
+            method="compose",
+            bg_color=None
+        )
 
 
     def _rotate_needle(self, values):
@@ -270,21 +255,12 @@ class AbstractBaseGauge(object):
         """
 
         for v in values:
-            angleFrom = v['angleFrom']
-
-            # Don't move needle on last trackpoint because there is no next
-            # point known to calculate rotation angle from.
-            key = values.index(v)
-            if key == len(values) - 1:
-                angleTo = angleFrom
-            else:
-                angleTo = v['angleTo']
-
-            # Define duration of rotation.
-            duration = v['duration']
             if duration > 0:
-                self._addDuration(duration)
-                self.__animateNeedleRotation(angleFrom, angleTo, duration)
+                self.__animateNeedleRotation(
+                    v['angleFrom'],
+                    v['angleTo'],
+                    v['duration']
+                )
 
 
     def setNeedle(self, path):

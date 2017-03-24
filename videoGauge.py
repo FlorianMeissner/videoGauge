@@ -90,6 +90,9 @@ class VideoGauge(object):
         self.LOG_LEVEL = "WARNING"
         self.BASEPATH = basePath(__file__)
 
+        # Construct Waypoint class
+        self._wp = WP()
+
         # Start calling methods
         self.__eventlogger()
         self._getCmdParams()
@@ -527,6 +530,8 @@ class VideoGauge(object):
         Read given GPX file and extract trackpoints.
         """
 
+        log.info("Reading GPX file. This may take a few seconds...")
+
         gpxfile = open(self.params['gpxfile'], 'r')
         gpx = gpxpy.parse(gpxfile, version='1.0')   # Even though that SkyDemon
                                                     # marks its GPX files as
@@ -538,21 +543,11 @@ class VideoGauge(object):
                                                     # the files header, it need
                                                     # to be forced to read in
                                                     # 1.0.
-        self.trkPts = []
-
-        # Construct Waypoit class
-        self._wp = WP()
 
         # Parse tracks.
         for track in gpx.tracks:
             for segment in track.segments:
                 for point in segment.points:
-                    trkPt = {'lat'   : point.latitude,
-                             'lon'   : point.longitude,
-                             'alt'   : point.elevation,
-                             'speed' : point.speed,
-                             'time'  : point.time}
-                    self.trkPts.append(trkPt)
                     self._wp.addWP(
                         lat=point.latitude, lat_unit=self._wp.U_DEG, \
                         lon=point.longitude, lon_unit=self._wp.U_DEG, \
@@ -560,6 +555,7 @@ class VideoGauge(object):
                         speed=point.speed, speed_unit=self._wp.U_MS, \
                         time=point.time
                     )
+        self._wp.showWPtable()
 
 
     # -------------------------------------------------------------------------
@@ -574,7 +570,6 @@ class VideoGauge(object):
 
         params = self.params['airspeed']
         gauge = gauges.Airspeed.Airspeed(
-            self.trkPts,
             self._wp,
             unit=params['unit'],
             digSpeed=False,

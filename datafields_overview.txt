@@ -3,19 +3,19 @@ Datafields Overview
 
    Field    |  Source   | Grade of implementation
 ------------+-----------+------------------------
-altitude    | GPX       | complete
-distance    | Calc      | complete
-duration    | Calc      | complete
-g           | Sensor    | open
-heading     | Calc      | complete
-lat         | GPX       | complete
-lon         | GPX       | complete
+altitude    | GPX       | in List
+distance    | Calc      | in List
+duration    | Calc      | in List
+g           | Calc      | in List
+heading     | Calc      | in List
+lat         | GPX       | in List
+lon         | GPX       | in List
 pitch       | Sensor    | open
 qnh         | Sensor    | open
 roll        | Sensor    | open
-speed       | GPX       | complete
-time        | GPX       | complete
-timestamp   | Calc      | complete
-vsi         | Calc      | complete
+speed       | GPX       | in List
+time        | GPX       | in List
+timestamp   | Calc      | in List
+vsi         | Calc      | in List
 windDir     | Sensor    | open
 windSpd     | Sensor    | open

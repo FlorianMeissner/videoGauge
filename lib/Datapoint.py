@@ -284,8 +284,8 @@ class WP(object):
                 "time"      :   time,
                 "timestamp" :   timestamp,
                 "vsi"       :   vsi,
-                "windDir"   :   windDir,
-                "windSpd"   :   windSpd,
+                "winddir"   :   windDir,
+                "windspd"   :   windSpd,
 
                 # Support fields
                 "higherNeighbour"   :   None,
@@ -496,6 +496,67 @@ class WP(object):
         self.__calculate()
 
 
+    def getAllByField(self, fields, units=None):
+        """
+        Get a list of all waypoints containing only the fields given by 'fields'
+        as list.
+        For each field a unit can be specified in a list passed in 'units' in
+        the same order as 'fields'. For each unit None can be passed to get the
+        default.
+        """
+
+        def subfunc(wp, fields, units):
+            result = {}
+
+            # If fields is a tuple, iterate through multiple datafields wanted.
+            if isinstance(fields, tuple):
+                for field in fields:
+
+                    # If a tuple of units is given, convert field into wanted
+                    # unit.
+                    if isinstance(units, tuple):
+                        key = fields.index(field)
+                        result[field] = self.__convertUnit(field, wp[field], units[key])
+
+                    # Otherwise return field unchanged.
+                    else:
+                        result[field] = wp[field]
+
+            # If fields is no tuple, it is assumed that only one field name was
+            # given. No check for a given unit is needed because __convert
+            # returns the value unchanged if None was given.
+            else:
+                result[fields] = self.__convertUnit(fields, wp[fields], units)
+
+            return result
+
+        return self.__iterWPlist(subfunc, (fields, units), ret=True)
+
+
+    def getDuration(self, waypoints=None):
+        """
+        Returns the accumulated duration of the given waypoints. Waypoints
+        expects a tuple of indices. If None is given, all waypoints are summed
+        up.
+        """
+
+        def subfunc(wp):
+            return wp['duration']
+
+
+        dur = 0.0
+
+        if isinstance(waypoints, tuple):
+            for i in waypoints:
+                dur += self.getWP(i, 'index')['duration']
+        else:
+            durations = self.__iterWPlist(subfunc, ret=True)
+            for i in durations:
+                dur += i
+
+        return dur
+
+
     def getWPListLength(self):
         """
         Returns the number of current list entries.
@@ -604,6 +665,33 @@ class WP(object):
     # -------------------------------------------------------------------------
 
 
+    def __convertUnit(self, fieldtype, value, targetUnit):
+        """
+        Convert a value of a given field type into a new target unit.
+        """
+
+        # Get default unit for given field
+        try:
+            default_name = "self.DEFAULT_U_" + fieldtype.upper()
+            exec("default_unit = %s" % default_name)
+
+        # Catch datafields without units. They will be returned unchanged.
+        except AttributeError:
+            default_unit = None
+
+        print default_unit, targetUnit
+
+        # No conversion needed
+        if targetUnit == default_unit or targetUnit is None or default_unit is None:
+            return value
+
+        else:
+            func = "%s2%s" % (default_unit, targetUnit)
+            exec("value = lib.calculations.av_conv.%s(value)" % func)
+            return value
+
+
+
     def __setParam(self, param, unit, default, allowed):
 
         """
@@ -649,8 +737,6 @@ class WP(object):
         These can be either artificial values needed for gauge animations or
         flight data not provides by GPS.
         """
-
-        self.showWPtable()
 
         if not self.__listCalculated:
             self.__convertTimestamp()
@@ -861,6 +947,7 @@ class WP(object):
 
         for i in range(self.getWPListLength()):
             wp = self.getWP(i, "index")
+            #~ print type(args), args
 
             if args is None:
                 #~ print("args: None")
@@ -877,6 +964,12 @@ class WP(object):
 
             elif args is tuple or args is list:
                 #~ print("args: Tuple, List")
+                if passIndex:
+                    args.append(i)
+                retVal = func(wp, *args)
+
+            elif isinstance(args, tuple) or isinstance(args, list):
+                #~ print("args: Tuple, List instance")
                 if passIndex:
                     args.append(i)
                 retVal = func(wp, *args)

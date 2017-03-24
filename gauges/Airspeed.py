@@ -23,7 +23,7 @@
 
 # Creator:  Florian Meissner
 #           n1990b@gmx.de
-# Version:  0.2
+# Version:  0.3
 # Date:     2017/02/21
 
 
@@ -34,6 +34,7 @@
 # 0.2:  - Implemented base class for all gauges.
 #       - Moved file out of template folder
 #       - Rework interfaces to better split between gauge class
+# 0.3:  - Implemented waypoint class as data source.
 
 
 ###############################################################################
@@ -52,15 +53,12 @@ import moviepy.editor       as mpy
 
 class Airspeed(BaseGauge.AbstractBaseGauge):
 
-    def __init__(self, points, wpInst, unit, digSpeed=False, autorun=False, \
+    def __init__(self, wpInst, unit, digSpeed=False, autorun=False, \
         settings=None):
 
         # Variables used in base class, too.
         self._Unit = unit.lower()
         self._Child = self.__class__.__name__
-
-        # Base class constructor
-        super(self.__class__, self).__init__()
 
         # Variables
         self._DigSpeed  =   digSpeed    # Show digital speed number in upper
@@ -68,6 +66,10 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         self._Settings  =   settings    # Video settings
         self._Speeds    =   []          # List with speeds from track point
                                         # list. Populated by self.__convert().
+        self._WpInst    =   wpInst      # Instance of waypoint class.
+
+        # Base class constructor
+        super(self.__class__, self).__init__()
 
 
         # If autorun is enabled, video animation will be written to disk
@@ -75,6 +77,27 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         if autorun:
             clip = self.make()
             self.save(clip, "output.mp4")
+
+
+    def _prepare(self):
+        """
+        Prepare a list with all data of all waypoints needed to create gauge.
+        """
+
+        # Get data from waypoint class.
+        self._Speeds = self._WpInst.getAllByField(
+            ('speed', 'duration', 'higherNeighbour'),
+            (self._WpInst.U_MPH, None, None)
+        )
+
+        # Calibrate into rotation angles.
+        for wp in self._Speeds:
+            key = self._Speeds.index(wp)
+            self._Speeds[key]['angleFrom'] = self._calibration(wp['speed'])
+            if isinstance(wp['higherNeighbour'], int):
+                self._Speeds[key]['angleTo'] = self._calibration(self._Speeds[wp['higherNeighbour']]['speed'])
+            else:
+                self._Speeds[key]['angleTo'] = self._calibration(wp['speed'])
 
 
     # -------------------------------------------------------------------------
@@ -166,6 +189,7 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
     # -------------------------------------------------------------------------
 
 
+    '''
     def __convert_speed(self, speed):
         """
         Calibrate given speed to turning angle of needle.
@@ -182,6 +206,7 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
             speed = conversions.ms2kt(speed)
 
         return speed
+    '''
 
 
     def __parse_speeds(self, pts):
