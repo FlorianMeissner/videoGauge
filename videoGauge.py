@@ -316,7 +316,7 @@ class VideoGauge(object):
             for opt, arg in opts:
 
                 # display help
-                if opt == "-h":
+                if opt in ("-h", "--help"):
                     displayHelp = True
 
                 # GPX input file
@@ -514,9 +514,198 @@ class VideoGauge(object):
         Display Help-text and terminate program.
         """
 
+        def linewrapper(arg, helptxt, indent=30):
+            """
+            Breakes lines at the right border of the terminal and continue in
+            the next line with the specified indent.
+            """
+
+            # Add colon to argument and wrap line instantly if argument is
+            # longer than indent. In this case fill new line with indent amount
+            # of whitespaces. If argument is shorter than indent, fill up
+            # argument with whitespace up to indent length.
+            arg += ": "
+            if len(arg) > indent:
+                arg = arg + "\n" + " " * indent
+            else:
+                arg = arg + " " * (indent - len(arg))
+
+            # Iterate threw each word of the help text. If length of line will
+            # go beyound terminal size, wrap line and fill with indent amount
+            # of whitespaces, then continue text.
+            linelen = 0
+            width, hight = getTerminalSize()
+            txt = ""
+            for word in helptxt.split():
+                word += " "
+                if linelen + len(word) < width - indent:
+                    txt += word
+                    linelen += len(word)
+                else:
+                    txt += "\n"
+                    txt  = txt + " " * indent
+                    txt += word
+                    linelen = len(word)
+
+            return arg + txt + "\n"
+
+        h  = "usage: videogauge [--help | -h]\n"
+        h += "                  [--version]\n"
+        h += "                  -g | --gpxfile FILE\n"
+        h += "                  [-o | --outputfolder PATH]\n"
+        h += "                  [-f] [-v] [-q]\n"
+        h += "                  [--airspeed UNIT]\n"
+        h += "                  [--airspeed-size WIDTHxHEIGHT]\n"
+        h += "                  [--airspeed-position POSXxPOSY]\n"
+        h += "                  [--airspeed-background HEXRGB]\n"
+        h += "                  [--airspeed-outputfile FILE]\n"
+        #~ h += "                  [--altitude UNIT]\n"
+        #~ h += "                  [--altitude-size WIDTHxHEIGHT]\n"
+        #~ h += "                  [--altitude-position POSXxPOSY]\n"
+        #~ h += "                  [--altitude-background HEXRGB]\n"
+        #~ h += "                  [--altitude-outputfile FILE]\n"
+        #~ h += "                  [--attitude]\n"
+        #~ h += "                  [--attitude-size WIDTHxHEIGHT]\n"
+        #~ h += "                  [--attitude-position POSXxPOSY]\n"
+        #~ h += "                  [--attitude-background HEXRGB]\n"
+        #~ h += "                  [--attitude-outputfile FILE]\n"
+        #~ h += "                  [--compass]\n"
+        #~ h += "                  [--compass-size WIDTHxHEIGHT]\n"
+        #~ h += "                  [--compass-position POSXxPOSY]\n"
+        #~ h += "                  [--compass-background HEXRGB]\n"
+        #~ h += "                  [--compass-outputfile FILE]\n"
+        #~ h += "                  [--gmeter]\n"
+        #~ h += "                  [--gmeter-size WIDTHxHEIGHT]\n"
+        #~ h += "                  [--gmeter-position POSXxPOSY]\n"
+        #~ h += "                  [--gmeter-background HEXRGB]\n"
+        #~ h += "                  [--gmeter-outputfile FILE]\n"
+        #~ h += "                  [--gyro]\n"
+        #~ h += "                  [--gyro-size WIDTHxHEIGHT]\n"
+        #~ h += "                  [--gyro-position POSXxPOSY]\n"
+        #~ h += "                  [--gyro-background HEXRGB]\n"
+        #~ h += "                  [--gyro-outputfile FILE]\n"
+        #~ h += "                  [--rpm]\n"
+        #~ h += "                  [--rpm-size WIDTHxHEIGHT]\n"
+        #~ h += "                  [--rpm-position POSXxPOSY]\n"
+        #~ h += "                  [--rpm-background HEXRGB]\n"
+        #~ h += "                  [--rpm-outputfile FILE]\n"
+        #~ h += "                  [--vsi UNIT]\n"
+        #~ h += "                  [--vsi-size WIDTHxHEIGHT]\n"
+        #~ h += "                  [--vsi-position POSXxPOSY]\n"
+        #~ h += "                  [--vsi-background HEXRGB]\n"
+        #~ h += "                  [--vsi-outputfile FILE]\n"
+        h += "\n"
+        h += "Control arguments:\n"
+        h += linewrapper("-h | --help",
+            "Show this help text.")
+        h += linewrapper("--version",
+            "Show the version of this program as wellas the versions of each \
+            gauge.")
+        h += linewrapper("-g | --gpxfile FILE",
+            "Specify the GPX file acting as data source. Provide either \
+            absolute or relative path.")
+        h += linewrapper("-o | --outputfolder PATH",
+            "Specify the output path for the created video files here. Provide \
+            either relative or absolute path. Do not add a filename! \
+            DEFAULT: Present working directory.")
+        h += linewrapper("-f",
+            "Force overwriting existing files.")
+        h += linewrapper("-v",
+            "Verbose mode. Shows tables with parsed waypointsfrom GPX file.")
+        h += linewrapper("-q",
+            "Quiet mode. Reduces output to a minimum. Implies -f.")
+        h += "\n"
+        h += "Airspeed indicator:\n"
+        h += linewrapper("--airspeed UNIT",
+            "Airspeed indicator will only be shown if this argument is passed. \
+            UNIT can be either of kt, mph.")
+        h += linewrapper("--airspeed-size WIDTHxHEIGHT",
+            "Define size of airspeed indicator in pixels. DEFAULT: %s" %
+            self.params['airspeed']['size'])
+        h += linewrapper("--airspeed-position POSXxPOSY",
+            "Define position of gauge in video. DEFAULT: %s" %
+            self.params['airspeed']['position'])
+        h += linewrapper("--airspeed-background HEXRGB",
+            "Define background color as HTML RGB hex code. DEFAULT: %s" %
+            self.params['airspeed']['bg'])
+        h += linewrapper("--airspeed-outputfile FILE",
+            "Specify a filename for the output file. The file will be saved relative to the path specified in --outputfolder. File extension must be *.mp4.")
+        """
+        h += linewrapper("--altitude UNIT",
+            "")
+        h += linewrapper("--altitude-size WIDTHxHEIGHT",
+            "")
+        h += linewrapper("--altitude-position POSXxPOSY",
+            "")
+        h += linewrapper("--altitude-background HEXRGB",
+            "")
+        h += linewrapper("--altitude-outputfile FILE",
+            "")
+        h += linewrapper("--attitude",
+            "")
+        h += linewrapper("--attitude-size WIDTHxHEIGHT",
+            "")
+        h += linewrapper("--attitude-position POSXxPOSY",
+            "")
+        h += linewrapper("--attitude-background HEXRGB",
+            "")
+        h += linewrapper("--attitude-outputfile FILE",
+            "")
+        h += linewrapper("--compass",
+            "")
+        h += linewrapper("--compass-size WIDTHxHEIGHT",
+            "")
+        h += linewrapper("--compass-position POSXxPOSY",
+            "")
+        h += linewrapper("--compass-background HEXRGB",
+            "")
+        h += linewrapper("--compass-outputfile FILE",
+            "")
+        h += linewrapper("--gmeter",
+            "")
+        h += linewrapper("--gmeter-size WIDTHxHEIGHT",
+            "")
+        h += linewrapper("--gmeter-position POSXxPOSY",
+            "")
+        h += linewrapper("--gmeter-background HEXRGB",
+            "")
+        h += linewrapper("--gmeter-outputfile FILE",
+            "")
+        h += linewrapper("--gyro",
+            "")
+        h += linewrapper("--gyro-size WIDTHxHEIGHT",
+            "")
+        h += linewrapper("--gyro-position POSXxPOSY",
+            "")
+        h += linewrapper("--gyro-background HEXRGB",
+            "")
+        h += linewrapper("--gyro-outputfile FILE",
+            "")
+        h += linewrapper("--rpm",
+            "")
+        h += linewrapper("--rpm-size WIDTHxHEIGHT",
+            "")
+        h += linewrapper("--rpm-position POSXxPOSY",
+            "")
+        h += linewrapper("--rpm-background HEXRGB",
+            "")
+        h += linewrapper("--rpm-outputfile FILE",
+            "")
+        h += linewrapper("--vsi UNIT",
+            "")
+        h += linewrapper("--vsi-size WIDTHxHEIGHT",
+            "")
+        h += linewrapper("--vsi-position POSXxPOSY",
+            "")
+        h += linewrapper("--vsi-background HEXRGB",
+            "")
+        h += linewrapper("--vsi-outputfile FILE",
+            "")
+        """
+
         if self.params["displayHelp"]:
             self._setLogFormat("%(message)s")
-            log.critical("Help!!")
+            log.critical(h)
             self.__exit()
 
 
