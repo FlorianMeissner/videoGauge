@@ -157,6 +157,26 @@ class AbstractBaseGauge(object):
         self._Gauge_script = getattr(module, unit)
 
 
+    def setPosition(self, x=None, y=None, xy=None):
+        """
+        Define psotion to display the gauge in.
+        If only x is set, y will be assumed the same.
+        If xy is set, it takes x and y size like 200x300. Overwrites x and y.
+        """
+
+        if x is None and y is None and xy is None:
+            raise ValueError("No value defined.")
+
+        if x is not None:
+            if y is None:
+                self._Position = (x, x)
+            else:
+                self._Position = (x, y)
+
+        elif xy is not None:
+            self._Position = gui_conv.splitXY(xy)
+
+
     def setSize(self, x=None, y=None, xy=None):
         """
         Define size to display the gauge in.
@@ -166,11 +186,13 @@ class AbstractBaseGauge(object):
 
         if x is None and y is None and xy is None:
             raise ValueError("No value defined.")
+
         if x is not None:
             if y is None:
                 self._Size = (x, x)
             else:
                 self._Size = (x, y)
+
         elif xy is not None:
             self._Size = gui_conv.splitXY(xy)
 

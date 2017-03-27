@@ -135,15 +135,21 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         c = needleSize(self._Size[0])
         d = needleSize(self._Size[1])
 
+        # Create gauge clip without background at first.
+        gaugeclip = [
+            self._FaceplateClip \
+                .resize((a, b)) \
+                .set_position('center'),
+            self._NeedleClip \
+                .resize((c, d)) \
+                .set_position('center')
+        ]
+        gaugeclip = mpy.CompositeVideoClip(gaugeclip)
+
         # Get clips in order. First clip will be played at the bottom, last at the top.
         composition = [
             self._BgClip,
-            self._FaceplateClip \
-                .resize((a, b)) \
-                .set_position(self._Position),
-            self._NeedleClip \
-                .resize((c, d)) \
-                .set_position(self._Position)
+            gaugeclip.set_position(self._Position)
         ]
 
         # Create digital speed display.
@@ -153,6 +159,7 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
 
         # Compose clips and export.
         final_video = mpy.CompositeVideoClip(composition)
+        #~ final_video = mpy.CompositeVideoClip(gaugeclip)
         return final_video
 
 

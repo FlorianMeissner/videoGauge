@@ -767,6 +767,7 @@ class VideoGauge(object):
         )
 
         gauge.setSize(xy=params['size'])
+        gauge.setPosition(xy=params['position'])
 
 
         """
