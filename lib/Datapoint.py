@@ -679,8 +679,6 @@ class WP(object):
         except AttributeError:
             default_unit = None
 
-        print default_unit, targetUnit
-
         # No conversion needed
         if targetUnit == default_unit or targetUnit is None or default_unit is None:
             return value

@@ -48,6 +48,7 @@ from lib.calculations       import av_conv
 from lib.myMisc             import lookahead
 
 # Foreign libraries
+from math                   import sqrt
 import moviepy.editor       as mpy
 
 
@@ -76,7 +77,7 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         # immediately after gathering all data.
         if autorun:
             clip = self.make()
-            self.save(clip, "output.mp4")
+            self.save(clip, "airspeed.mp4")
 
 
     def _prepare(self):
@@ -109,6 +110,15 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         Create final video clip.
         """
 
+        def faceplateSize(hy):
+            cat = sqrt(hy**2/2)
+            diff = hy - cat
+            a = cat + diff/2
+            return a
+
+        def needleSize(a):
+            return a * 1.075
+
         # Create needles
         self._rotate_needle(self._Speeds)
         self._concate_needles()
@@ -119,10 +129,22 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         # Create background.
         self._create_background()
 
+        # Calculate size for faceplate
+        a = faceplateSize(self._Size[0])
+        b = faceplateSize(self._Size[1])
+        c = needleSize(self._Size[0])
+        d = needleSize(self._Size[1])
+
         # Get clips in order. First clip will be played at the bottom, last at the top.
-        composition = [self._BgClip,
-                       self._FaceplateClip.resize(self._Size).set_position(self._Position),
-                       self._NeedleClip.resize(self._Size).set_position(self._Position)]
+        composition = [
+            self._BgClip,
+            self._FaceplateClip \
+                .resize((a, b)) \
+                .set_position(self._Position),
+            self._NeedleClip \
+                .resize((c, d)) \
+                .set_position(self._Position)
+        ]
 
         # Create digital speed display.
         if self._DigSpeed:
@@ -188,27 +210,7 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
     # - Needle                                                                -
     # -------------------------------------------------------------------------
 
-
     '''
-    def __convert_speed(self, speed):
-        """
-        Calibrate given speed to turning angle of needle.
-        Convert speed from native GPX m/s to indicators MPH. Then convert into
-        rotating angle for needle.
-        """
-
-        # m/s to MPH
-        if self._Unit == "mph":
-            speed = conversions.ms2mph(speed)
-
-        # m/s to kt
-        elif self._Unit == "kt":
-            speed = conversions.ms2kt(speed)
-
-        return speed
-    '''
-
-
     def __parse_speeds(self, pts):
         """
         Work through list of given track points and filter speed and duration
@@ -237,7 +239,7 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
                         'speed'     :   speedFrom
                     }
                 )
-
+    '''
 
 # EOF
 

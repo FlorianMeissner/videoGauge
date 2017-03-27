@@ -40,7 +40,7 @@
 
 
 # Own libraries
-from lib.calculations   import av_conv, interpolation, triangulation
+from lib.calculations   import av_conv, gui_conv, interpolation, triangulation
 from lib.Exceptions     import *
 from lib.myMisc         import basePath
 
@@ -85,9 +85,10 @@ class AbstractBaseGauge(object):
         Get clip showing background color over the hole duration of the video.
         """
 
-        bgSize = int(triangulation.pythagoras(a=self._Size[0], b=self._Size[1]))
+        #~ bgSize = int(triangulation.pythagoras(a=self._Size[0], b=self._Size[1]))
         self._BgClip = mpy.ColorClip(
-            size=(bgSize, bgSize),
+            #~ size=(bgSize, bgSize),
+            size=(gui_conv.splitXY(self._Settings['format'])),
             col=self._BgColor,
             duration=self._WpInst.getDuration()
         )
@@ -154,6 +155,24 @@ class AbstractBaseGauge(object):
         #~ self.calibrator = getattr(airspeed, unit)
         module = importlib.import_module("gauges."+self._Child.lower())
         self._Gauge_script = getattr(module, unit)
+
+
+    def setSize(self, x=None, y=None, xy=None):
+        """
+        Define size to display the gauge in.
+        If only x is set, y will be assumed the same.
+        If xy is set, it takes x and y size like 200x300. Overwrites x and y.
+        """
+
+        if x is None and y is None and xy is None:
+            raise ValueError("No value defined.")
+        if x is not None:
+            if y is None:
+                self._Size = (x, x)
+            else:
+                self._Size = (x, y)
+        elif xy is not None:
+            self._Size = gui_conv.splitXY(xy)
 
 
     # -------------------------------------------------------------------------
@@ -255,7 +274,7 @@ class AbstractBaseGauge(object):
         """
 
         for v in values:
-            if duration > 0:
+            if v['duration'] > 0:
                 self.__animateNeedleRotation(
                     v['angleFrom'],
                     v['angleTo'],

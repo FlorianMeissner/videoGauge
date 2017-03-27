@@ -514,7 +514,7 @@ class VideoGauge(object):
         Display Help-text and terminate program.
         """
 
-        def linewrapper(arg, helptxt, indent=30):
+        def linewrapper(arg, helptxt, indent=25):
             """
             Breakes lines at the right border of the terminal and continue in
             the next line with the specified indent.
@@ -759,12 +759,15 @@ class VideoGauge(object):
 
         params = self.params['airspeed']
         gauge = gauges.Airspeed.Airspeed(
-            self._wp,
+            wpInst=self._wp,
             unit=params['unit'],
             digSpeed=False,
             autorun=False,
             settings=self.VIDEOSETTINGS
         )
+
+        gauge.setSize(xy=params['size'])
+
 
         """
         # Background color
