@@ -110,15 +110,6 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         Create final video clip.
         """
 
-        def faceplateSize(hy):
-            cat = sqrt(hy**2/2)
-            diff = hy - cat
-            a = cat + diff/2
-            return a
-
-        def needleSize(a):
-            return a * 1.075
-
         # Create needles
         self._rotate_needle(self._Speeds)
         self._concate_needles()
@@ -129,19 +120,14 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         # Create background.
         self._create_background()
 
-        # Calculate size for faceplate
-        a = faceplateSize(self._Size[0])
-        b = faceplateSize(self._Size[1])
-        c = needleSize(self._Size[0])
-        d = needleSize(self._Size[1])
-
-        # Create gauge clip without background at first.
+        # Create gauge clip without background at first because otherwise needle
+        # will be moved out of center of faceplate.
         gaugeclip = [
             self._FaceplateClip \
-                .resize((a, b)) \
+                .resize(self._Size) \
                 .set_position('center'),
             self._NeedleClip \
-                .resize((c, d)) \
+                .resize((self._Size[0]*1.5, self._Size[1]*1.5)) \
                 .set_position('center')
         ]
         gaugeclip = mpy.CompositeVideoClip(gaugeclip)
@@ -159,7 +145,6 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
 
         # Compose clips and export.
         final_video = mpy.CompositeVideoClip(composition)
-        #~ final_video = mpy.CompositeVideoClip(gaugeclip)
         return final_video
 
 
