@@ -818,8 +818,6 @@ class WP(object):
         track points.
         """
 
-        #~ print "GetDuration"
-
         def subfunc(wp):
             if wp['higherNeighbour'] == "LAST":
                 if wp['duration'] is None:
@@ -878,8 +876,6 @@ class WP(object):
         waypoints. If it is the first waypoint, set lower neighbour to FIRST
         and if it is last waypoint set higher neighbour to LAST.
         """
-
-        #~ print("GetNeighbour")
 
         def subfunc(wp, i, direction):
             """

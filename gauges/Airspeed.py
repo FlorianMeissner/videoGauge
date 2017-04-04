@@ -197,41 +197,5 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
             # Merge track point text clips.
             self._SpeedClip = mpy.concatenate_videoclips(speedClips)
 
-
-    # -------------------------------------------------------------------------
-    # - Needle                                                                -
-    # -------------------------------------------------------------------------
-
-    '''
-    def __parse_speeds(self, pts):
-        """
-        Work through list of given track points and filter speed and duration
-        from them. Also convert speeds into rotation angle for needle graphic.
-
-        lookahead() is used because it is mandetory to remember values from last
-        run of the for loop to get angle range to animate.
-        """
-
-        for pt in lookahead(pts):
-
-            # Last value will be not tuple. Skip because it has no following
-            # point.
-            if type(pt) is tuple:
-                duration  = pt[0]['length']
-                speedFrom = self.__convert_speed(pt[0]['speed'])
-                angleFrom = self._calibration(speedFrom)
-                speedTo   = self.__convert_speed(pt[1]['speed'])
-                angleTo   = self._calibration(speedTo)
-
-                self._Speeds.append(
-                    {
-                        'angleFrom' :   angleFrom,
-                        'angleTo'   :   angleTo,
-                        'duration'  :   duration,
-                        'speed'     :   speedFrom
-                    }
-                )
-    '''
-
 # EOF
 

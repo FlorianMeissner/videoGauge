@@ -101,8 +101,6 @@ class VideoGauge(object):
         self.__output_folder()
         self._chkMissingParams()
         self._readGPX()
-        #~ self._wp.changeWP(1, altitude=1000, altitude_unit=self._wp.U_M)
-        self._wp.changeWP(1, altitude=1000)
         self._runGauges()
 
         self.__exit()

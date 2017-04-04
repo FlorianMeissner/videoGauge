@@ -85,9 +85,7 @@ class AbstractBaseGauge(object):
         Get clip showing background color over the hole duration of the video.
         """
 
-        #~ bgSize = int(triangulation.pythagoras(a=self._Size[0], b=self._Size[1]))
         self._BgClip = mpy.ColorClip(
-            #~ size=(bgSize, bgSize),
             size=(gui_conv.splitXY(self._Settings['format'])),
             col=self._BgColor,
             duration=self._WpInst.getDuration()
@@ -143,7 +141,7 @@ class AbstractBaseGauge(object):
 
         # Set pathes for graphics
         prefix = self.BASEPATH + "airspeed/" + unit + "_"
-        self.setNeedle(prefix + "needle2.png")
+        self.setNeedle(prefix + "needle.png")
         self.setFaceplate(prefix + "faceplate.png")
 
         # Get calibration table.
@@ -152,7 +150,6 @@ class AbstractBaseGauge(object):
         if self._Child is None:
             raise AbstractImplementationRequired("self._Child")
 
-        #~ self.calibrator = getattr(airspeed, unit)
         module = importlib.import_module("gauges."+self._Child.lower())
         self._Gauge_script = getattr(module, unit)
 
@@ -216,8 +213,6 @@ class AbstractBaseGauge(object):
         # Using starting point first in the subtraction results in negative
         # delta values if needle should show rise.
         delta = (aFrom - aTo) / dur
-
-        #~ print(aFrom, aTo, delta, dur, self.Duration)
 
         # Invert starting angle because of rotation direction.
         aFrom = aFrom * -1
