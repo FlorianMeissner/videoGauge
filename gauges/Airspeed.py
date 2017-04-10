@@ -23,8 +23,8 @@
 
 # Creator:  Florian Meissner
 #           n1990b@gmx.de
-# Version:  0.3
-# Date:     2017/02/21
+# Version:  1.0
+# Date:     2017/04/07
 
 
 # VERSION HISTORY
@@ -35,6 +35,8 @@
 #       - Moved file out of template folder
 #       - Rework interfaces to better split between gauge class
 # 0.3:  - Implemented waypoint class as data source.
+# 1.0:  - Stable version
+#       - Moved save() method to BaseGauge.
 
 
 ###############################################################################
@@ -146,22 +148,6 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         # Compose clips and export.
         final_video = mpy.CompositeVideoClip(composition)
         return final_video
-
-
-    def save(self, clip, filename, settings=None):
-        """
-        Save compiled video to disk.
-        """
-
-        if settings is None:
-            settings = self._Settings
-
-        clip.write_videofile(filename,
-                             fps=settings['framerate'],
-                             codec=settings['codec'],
-                             audio=settings['audio'],
-                             threads=settings['ffmpeg_threads'],
-                             preset=settings['ffmpeg_preset'])
 
 
     # -------------------------------------------------------------------------

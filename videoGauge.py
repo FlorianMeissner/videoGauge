@@ -67,7 +67,6 @@ import getopt
 import gpxpy
 import logging                  as log
 import os
-import shutil
 import sys
 
 
@@ -98,7 +97,7 @@ class VideoGauge(object):
         self._getCmdParams()
         self.__title()
         self._displayHelp()
-        self.__output_folder()
+        #~ self.__output_folder()
         self._chkMissingParams()
         self._readGPX()
         self._runGauges()
@@ -192,7 +191,8 @@ class VideoGauge(object):
         displayHelp = False
 
         gpxfile = None
-        outputfolder = "Gauges/"
+        #~ outputfolder = "Gauges/"
+        outputfolder = os.getcwd() + "/"
         force = False
 
         quiet = False
@@ -768,26 +768,16 @@ class VideoGauge(object):
         gauge.setPosition(xy=params['position'])
 
 
-        """
-        # Background color
-        r, g, b = colorHex2RGB(params['bg'])
-        gauge.setBackground(r, g, b)
-
-        # Position
-        gauge.setPosition(splitXY(params['position']))
-
-        # Size
-        w, h = splitXY(params['size'])
-        gauge.setSize(w, h)
-        """
-
         clip = gauge.make()
 
         filename  = self.params['outputfolder']
         filename += "airspeed"
         filename += self.VIDEOSETTINGS['filetype']
 
-        gauge.save(clip, filename)
+        try:
+            gauge.save(clip, filename, force=self.params['force'])
+        except IOError, e:
+            self.__exit(e, True)
 
 
     def _altitude(self):
@@ -835,6 +825,7 @@ class VideoGauge(object):
     # -------------------------------------------------------------------------
 
 
+    '''
     def __output_folder(self):
         """
         Handle output folder for video files.
@@ -859,7 +850,8 @@ class VideoGauge(object):
 
         # Create new folder.
         os.mkdir(self.params['outputfolder'])
-
+    '''
+    
 
 
 # *****************************************************************************

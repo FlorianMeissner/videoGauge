@@ -34,6 +34,8 @@
 
 # 0.1:  - Initial Beta
 # 0.2:  - Make class abstract
+# 1.0:  - Stable version
+#       - Added save() method
 
 
 ###############################################################################
@@ -99,6 +101,49 @@ class AbstractBaseGauge(object):
 
         self._BgColor = (r, g, b)
 
+        
+    # -------------------------------------------------------------------------
+    # - Composition                                                           -
+    # -------------------------------------------------------------------------
+    
+    
+    def save(self, clip, path, settings=None, force=False):
+        """
+        Save compiled video to disk.
+        """
+        
+        if os.path.isdir(path):
+            raise IOError(
+                "'%s' is a directory. We can't overwrite directories with files!"
+                % path
+            )
+
+        if os.path.isfile(path):
+            a = "no"
+
+            # In quiet mode force to overwrite.
+            if not force:
+                # If folder exists ask user to overwrite.
+                q  = "The file '%s' already exists. "
+                q += "It will be overridden. "
+                q += "Continue? (Y/n): "
+                a = raw_input(q % path)
+
+            if a.lower() in ("", "y", "yes") or force:
+                os.remove(path)
+            else:
+                raise IOError("Aborted by user...")
+
+        if settings is None:
+            settings = self._Settings
+
+        clip.write_videofile(path,
+                             fps=settings['framerate'],
+                             codec=settings['codec'],
+                             audio=settings['audio'],
+                             threads=settings['ffmpeg_threads'],
+                             preset=settings['ffmpeg_preset'])
+        
 
     # -------------------------------------------------------------------------
     # - Faceplate                                                             -
@@ -226,24 +271,15 @@ class AbstractBaseGauge(object):
         )
 
 
-    def _calibration(self, speed):
         """
-        Calibate scale of faceplate to MPH.
         """
 
         calibration = self._Gauge_script.calibration()
 
-        # Get list of known speed values.
-        knownSpeeds = list(calibration.keys())
-        knownSpeeds.sort()
 
         # Check if value is out of scale.
-        if speed > max(knownSpeeds):
-            speed = max(knownSpeeds)
 
         # Check for known values and return in directly.
-        if speed in calibration:
-            return calibration[speed]
 
         # If value is unknown, calculate intermittent one from linear equation
         # between known neighbours of calibration table.
@@ -252,11 +288,8 @@ class AbstractBaseGauge(object):
             lowerNeighbour = 0
             higherNeighbour = 0
 
-            for i in knownSpeeds:
-                if i < speed:
                     lowerNeighbour = i
                     continue
-                if i > speed:
                     higherNeighbour = i
                     break
 
@@ -265,7 +298,6 @@ class AbstractBaseGauge(object):
                                             calibration[lowerNeighbour],
                                             higherNeighbour,
                                             calibration[higherNeighbour],
-                                            speed)
 
             # MoviePy uses positive values for counter-clockwise turns.
             return angle

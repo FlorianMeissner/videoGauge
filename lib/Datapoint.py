@@ -24,13 +24,14 @@
 # Creator:  Florian Meissner
 #           n1990b@gmx.de
 # Version:  0.1
-# Date:     2017/03/12
+# Date:     2017/04/07
 
 
 # VERSION HISTORY
 # ===============
 
 # 0.1:  - Initial Beta
+# 1.0:  - stable version
 
 
 ###############################################################################
@@ -325,11 +326,12 @@ class WP(object):
         """
 
         # Check if at least one parameters has been set.
-        params = (altitude, distance, duration, g, heading, lat, lon, pitch, qnh, roll, speed, time, \
-            timestamp, vsi, windDir, windSpd, lowerNeighbour, higherNeighbour)
+        params = (altitude, distance, duration, g, heading, lat, lon, pitch, \
+            qnh, roll, speed, time, timestamp, vsi, windDir, windSpd, \
+            lowerNeighbour, higherNeighbour)
 
         if all(v is None for v in params):
-            raise ValueError("Specify at least one parameter to add a new waypoint.")
+            raise ValueError("Specify at least one parameter to change a waypoint.")
 
         altitude = self.__setParam(
             altitude,
@@ -523,7 +525,7 @@ class WP(object):
                         result[field] = wp[field]
 
             # If fields is no tuple, it is assumed that only one field name was
-            # given. No check for a given unit is needed because __convert
+            # given. No check for a given unit is needed because __convert()
             # returns the value unchanged if None was given.
             else:
                 result[fields] = self.__convertUnit(fields, wp[fields], units)
@@ -606,11 +608,12 @@ class WP(object):
 
             line.append("%7.5f" % wp['lat'])
             line.append("%7.5f" % wp['lon'])
-            line.append("%7.4f" % wp['altitude'])
+            line.append("%4.1f" % wp['altitude'])
             line.append("%4.1f" % wp['speed'])
-            line.append(str(wp['time']))
+            #line.append(str(wp['time']))
             line.append("%s" % wp['timestamp'])
-
+            
+            """
             if isinstance(wp['lowerNeighbour'], str):
                 lNb = wp['lowerNeighbour'][0]
             else:
@@ -620,12 +623,13 @@ class WP(object):
                 hNb = wp['higherNeighbour'][0]
             else:
                 hNb = wp['higherNeighbour']
-
-            line.append("%s, %s" % (lNb, hNb))
+            """
+            
+            #line.append("%s, %s" % (lNb, hNb))
             line.append("%s" % wp['duration'])
-            line.append("%s" % wp['heading'])
-            line.append("%s" % wp['distance'])
-            line.append("%s" % wp['vsi'])
+            line.append("%4.1f" % wp['heading'])
+            line.append("%4.1f" % wp['distance'])
+            line.append("%4.1f" % wp['vsi'])
 
             g = ""
             for key, value in wp['g'].iteritems():
@@ -638,7 +642,22 @@ class WP(object):
 
         # Prepare table head
         rows = []
-        rows.append(['Lat', 'Lon', 'Alt', 'Spd', 'Time', 'Ts', 'Nb', 'Dur', 'HDG', 'Dist', 'vsi', 'G'])
+        rows.append(
+            [
+                'Lat', 
+                'Lon', 
+                'Alt', 
+                'Spd', 
+                #'Time', 
+                'Ts', 
+                #'Nb', 
+                'Dur', 
+                'HDG', 
+                'Dist', 
+                'vsi', 
+                'G'
+            ]
+        )
 
         # Parse returned lines. If thereis more then one line, the returned list containes
         # additional listes and needs to be itterated threw.
