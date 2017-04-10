@@ -25,8 +25,8 @@
 
 # Creator:  Florian Meissner
 #           n1990b@gmx.de
-# Version:  0.2
-# Date:     2017/03/10
+# Version:  1.0
+# Date:     2017/04/07
 
 
 # VERSION HISTORY
@@ -263,7 +263,7 @@ class AbstractBaseGauge(object):
         aFrom = aFrom * -1
 
         # Rotate needle
-        # For clockwise rotaion use negative values.
+        # For clockwise rotation use negative values.
         self._Needles.append(
             baseNeedle.rotate(
                 lambda t: aFrom+t*delta
@@ -271,15 +271,24 @@ class AbstractBaseGauge(object):
         )
 
 
+    def _calibration(self, value, calFunc='calibration'):
         """
+        Calibate scale of faceplate.
         """
 
         calibration = self._Gauge_script.calibration()
 
+        # Get list of known values.
+        knownValues = list(calibration.keys())
+        knownValues.sort()
 
         # Check if value is out of scale.
+        if value > max(knownValues):
+            value = max(knownValues)
 
         # Check for known values and return in directly.
+        if value in calibration:
+            return calibration[value]
 
         # If value is unknown, calculate intermittent one from linear equation
         # between known neighbours of calibration table.
@@ -288,8 +297,11 @@ class AbstractBaseGauge(object):
             lowerNeighbour = 0
             higherNeighbour = 0
 
+            for i in knownValues:
+                if i < value:
                     lowerNeighbour = i
                     continue
+                if i > value:
                     higherNeighbour = i
                     break
 
@@ -298,6 +310,7 @@ class AbstractBaseGauge(object):
                                             calibration[lowerNeighbour],
                                             higherNeighbour,
                                             calibration[higherNeighbour],
+                                            value)
 
             # MoviePy uses positive values for counter-clockwise turns.
             return angle

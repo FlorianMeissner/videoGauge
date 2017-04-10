@@ -43,8 +43,6 @@
 
 # Creator:  Florian Meissner
 #           n1990b@gmx.de
-# Version:  0.2
-# Date:     2017/03/09
 # Version:  1.1
 # Date:     2017/04/07
 
@@ -55,12 +53,14 @@
 # 0.1:  - Initial Beta
 # 0.2:  - Changed description of file sturcture above.
 # 1.0:  - Stable version
+# 1.1:  - added Altitude indictor
 
 
 ###################################################################################################
 
 
 import Airspeed
+import Altitude
 
 
 # EOF
