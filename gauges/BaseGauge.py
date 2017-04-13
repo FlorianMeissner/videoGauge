@@ -87,11 +87,12 @@ class AbstractBaseGauge(object):
         Get clip showing background color over the hole duration of the video.
         """
 
-        self._BgClip = mpy.ColorClip(
+        clip = mpy.ColorClip(
             size=(gui_conv.splitXY(self._Settings['format'])),
             col=self._BgColor,
             duration=self._WpInst.getDuration()
         )
+        return clip
 
 
     def setBackground(self, r, g, b):
@@ -150,14 +151,14 @@ class AbstractBaseGauge(object):
     # -------------------------------------------------------------------------
 
 
-    def _create_faceplate_clip(self):
+    def _create_faceplate_clip(self, var="_FaceplateImage"):
         """
         Create clip with stanting image of faceplate.
         """
 
-        self._FaceplateClip = mpy.ImageClip(self._FaceplateImage)
-        self._FaceplateClip = \
-            self._FaceplateClip.set_duration(self._WpInst.getDuration())
+        clip = mpy.ImageClip(getattr(self, var))
+        clip = clip.set_duration(self._WpInst.getDuration())
+        return clip
 
 
     def setFaceplate(self, path=None, filename='faceplate.png', \
@@ -317,17 +318,14 @@ class AbstractBaseGauge(object):
             return angle
 
 
-    def _concate_needles(self):
+    def _concate_needles(self, needleList="_Needles"):
         """
         Create video containing all needle positions after another with
         respective length.
         """
 
-        self._NeedleClip = mpy.concatenate_videoclips(
-            self._Needles,
-            method="compose",
-            bg_color=None
-        )
+        return mpy.concatenate_videoclips(getattr(self, needleList), \
+            method="compose", bg_color=None)
 
 
     def _rotate_needle(self, values, needleList="_Needles", needleImg="BaseNeedle"):

@@ -139,6 +139,7 @@ class Altitude(BaseGauge.AbstractBaseGauge):
         tenthousend = []
         thousend = []
         hundret = []
+
         for alt in self._Altitudes:
             tenthousend.append(
                 {
@@ -161,25 +162,34 @@ class Altitude(BaseGauge.AbstractBaseGauge):
                     'angleTo'   : alt['angleTo100']
                 }
             )
+
         self._rotate_needle(tenthousend, "_Needle10000", "BaseNeedle10000")
         self._rotate_needle(thousend, "_Needle1000", "BaseNeedle1000")
         self._rotate_needle(hundret, "_Needle100", "BaseNeedle100")
-        """
-        self._concate_needles()
+
+        needleClip10000 = self._concate_needles("_Needle10000")
+        needleClip1000 = self._concate_needles("_Needle1000")
+        needleClip100 = self._concate_needles("_Needle100")
 
         # Create faceplate
-        self._create_faceplate_clip()
+        faceplateClip = self._create_faceplate_clip()
 
         # Create background.
-        self._create_background()
+        bgClip = self._create_background()
 
         # Create gauge clip without background at first because otherwise needle
         # will be moved out of center of faceplate.
         gaugeclip = [
-            self._FaceplateClip \
+            faceplateClip \
                 .resize(self._Size) \
                 .set_position('center'),
-            self._NeedleClip \
+            needleClip10000 \
+                .resize((self._Size[0]*1.0, self._Size[1]*1.0)) \
+                .set_position('center'),
+            needleClip1000 \
+                .resize((self._Size[0]*1.5, self._Size[1]*1.5)) \
+                .set_position('center'),
+            needleClip100 \
                 .resize((self._Size[0]*1.5, self._Size[1]*1.5)) \
                 .set_position('center')
         ]
@@ -188,20 +198,20 @@ class Altitude(BaseGauge.AbstractBaseGauge):
         # Get clips in order. First clip will be played at the bottom, last at
         # the top.
         composition = [
-            self._BgClip,
+            bgClip,
             gaugeclip.set_position(self._Position)
         ]
 
         # Create digital speed display.
+        """
         if self._DigSpeed:
             self.__show_speed()
             composition.append(self._SpeedClip)
+        """
 
         # Compose clips and export.
         final_video = mpy.CompositeVideoClip(composition)
         return final_video
-        """
-        pass
 
     # -------------------------------------------------------------------------
     # - Digital speeds                                                        -

@@ -117,21 +117,21 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
 
         # Create needles
         self._rotate_needle(self._Speeds)
-        self._concate_needles()
+        needleClip = self._concate_needles()
 
         # Create faceplate
-        self._create_faceplate_clip()
+        faceplateClip = self._create_faceplate_clip()
 
         # Create background.
-        self._create_background()
+        bgClip = self._create_background()
 
         # Create gauge clip without background at first because otherwise needle
         # will be moved out of center of faceplate.
         gaugeclip = [
-            self._FaceplateClip \
+            faceplateClip \
                 .resize(self._Size) \
                 .set_position('center'),
-            self._NeedleClip \
+            needleClip \
                 .resize((self._Size[0]*1.5, self._Size[1]*1.5)) \
                 .set_position('center')
         ]
@@ -139,7 +139,7 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
 
         # Get clips in order. First clip will be played at the bottom, last at the top.
         composition = [
-            self._BgClip,
+            bgClip,
             gaugeclip.set_position(self._Position)
         ]
 

@@ -865,10 +865,10 @@ class VideoGauge(object):
         filename += "altitude"
         filename += self.VIDEOSETTINGS['filetype']
 
-        #~ try:
-            #~ gauge.save(clip, filename, force=self.params['force'])
-        #~ except IOError, e:
-            #~ self.__exit(e, True)
+        try:
+            gauge.save(clip, filename, force=self.params['force'])
+        except IOError, e:
+            self.__exit(e, True)
 
 
     def _attitude(self):
