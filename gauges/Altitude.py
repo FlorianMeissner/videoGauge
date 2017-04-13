@@ -38,8 +38,6 @@
 import BaseGauge
 
 # Own library modules
-from lib.calculations       import av_conv
-from lib.myMisc             import splitPower
 
 # Foreign libraries
 import moviepy.editor       as mpy
@@ -107,18 +105,21 @@ class Altitude(BaseGauge.AbstractBaseGauge):
         for wp in self._Altitudes:
 
             key = self._Altitudes.index(wp)
-            altSplit = splitPower(wp['altitude'])
+            altSplit = self._Gauge_script.splitPower(wp['altitude'])
 
             self._Altitudes[key]['angleFrom10000'] = \
                 self.__calibrator(altSplit[3], altSplit[0])
+
             self._Altitudes[key]['angleFrom1000'] = \
                 self.__calibrator(altSplit[4], altSplit[1])
+
             self._Altitudes[key]['angleFrom100'] = \
                 self.__calibrator(altSplit[5], altSplit[2])
 
             if isinstance(wp['higherNeighbour'], int):
                 altSplitHN = \
-                    splitPower(self._Altitudes[wp['higherNeighbour']]['altitude'])
+                    self._Gauge_script.splitPower(\
+                    self._Altitudes[wp['higherNeighbour']]['altitude'])
 
                 self._Altitudes[key]['angleTo10000'] = \
                 self.__calibrator(altSplitHN[3], altSplitHN[0])

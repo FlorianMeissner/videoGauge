@@ -35,6 +35,9 @@
 ###################################################################################################
 
 
+from math                   import floor
+
+
 def calibration():
 
     # Define calibration table. Non existing speed values will be interpolated between existing
@@ -94,3 +97,29 @@ def calibration():
        10.0 : 360.28
     }
     return cal
+
+
+def splitPower(number):
+    """
+    Splits a given number into powers of 10.
+
+    rot* holds the amount of revolutions needed to display its part of number
+    correctly. Used for accurate animation beyond one return of needle.
+    """
+
+    FACEPLATE_MAX = 10
+
+    number = float(number)
+    tenthousend = number / 10000
+    thousend = (number - floor(tenthousend) * 10000) / 1000
+    hundret = (number - floor(tenthousend) * 10000 - \
+        floor(thousend) * 1000) / 100
+
+    rot10000 = floor(tenthousend / FACEPLATE_MAX)
+    rot1000 = floor(tenthousend)
+    rot100 = floor(thousend) + rot1000 * 10
+
+    return (tenthousend, thousend, hundret, rot10000, rot1000, rot100)
+
+
+# EOF
