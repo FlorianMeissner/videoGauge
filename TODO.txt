@@ -9,6 +9,7 @@ VIDEO GAUGE CREATOR TODO
 - Create installer script
 - Write readme
 - Runtime counter
+- Pass on to next video if one could not be created.
 
 
 Florian Meissner

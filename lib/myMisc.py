@@ -89,13 +89,23 @@ def splitPower(number):
     Splits a given number into powers of 10.
     """
 
+    FACEPLATE_MAX = 10
+
     number = float(number)
     tenthousend = number / 10000
     thousend = (number - floor(tenthousend) * 10000) / 1000
     hundret = (number - floor(tenthousend) * 10000 - \
         floor(thousend) * 1000) / 100
 
-    return (tenthousend, thousend, hundret)
+    print tenthousend, thousend, hundret
+
+    rot10000 = floor(tenthousend / FACEPLATE_MAX)
+    rot1000 = floor(tenthousend)
+    rot100 = floor(thousend) + rot1000 * 10
+
+    print rot10000, rot1000, rot100
+
+    return (tenthousend, thousend, hundret, rot10000, rot1000, rot100)
 
 
 # EOF

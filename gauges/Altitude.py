@@ -81,6 +81,17 @@ class Altitude(BaseGauge.AbstractBaseGauge):
             self.save(clip, "altitude.mp4")
 
 
+    def __calibrator(self, fullRevolutions, splitRevolution):
+        """
+        Calibrate given altitude to rotation angle with respect the multiple
+        rotations of the needle for higher values.
+        """
+
+        fullAngle = fullRevolutions * 360.0
+        splitAngle = self._calibration(splitRevolution)
+        return fullAngle + splitAngle
+
+
     def _prepare(self):
         """
         Prepare a list with all data of all waypoints needed to create gauge.
@@ -98,32 +109,37 @@ class Altitude(BaseGauge.AbstractBaseGauge):
             key = self._Altitudes.index(wp)
             altSplit = splitPower(wp['altitude'])
 
-            self._Altitudes[key]['angleFrom10000'] = self._calibration(altSplit[0])
-            self._Altitudes[key]['angleFrom1000'] = self._calibration(altSplit[1])
-            self._Altitudes[key]['angleFrom100'] = self._calibration(altSplit[2])
+            self._Altitudes[key]['angleFrom10000'] = \
+                self.__calibrator(altSplit[3], altSplit[0])
+            self._Altitudes[key]['angleFrom1000'] = \
+                self.__calibrator(altSplit[4], altSplit[1])
+            self._Altitudes[key]['angleFrom100'] = \
+                self.__calibrator(altSplit[5], altSplit[2])
 
             if isinstance(wp['higherNeighbour'], int):
                 altSplitHN = \
                     splitPower(self._Altitudes[wp['higherNeighbour']]['altitude'])
 
                 self._Altitudes[key]['angleTo10000'] = \
-                    self._calibration(altSplitHN[0])
+                self.__calibrator(altSplitHN[3], altSplitHN[0])
 
                 self._Altitudes[key]['angleTo1000'] = \
-                    self._calibration(altSplitHN[1])
+                self.__calibrator(altSplitHN[4], altSplitHN[1])
 
                 self._Altitudes[key]['angleTo100'] = \
-                    self._calibration(altSplitHN[2])
+                self.__calibrator(altSplitHN[5], altSplitHN[2])
 
             else:
                 self._Altitudes[key]['angleTo10000'] = \
-                    self._calibration(altSplit[0])
+                self.__calibrator(altSplit[3], altSplit[0])
 
                 self._Altitudes[key]['angleTo1000'] = \
-                    self._calibration(altSplit[1])
+                self.__calibrator(altSplit[4], altSplit[1])
 
                 self._Altitudes[key]['angleTo100'] = \
-                    self._calibration(altSplit[2])
+                self.__calibrator(altSplit[5], altSplit[2])
+
+        #~ print self._Altitudes
 
 
     # -------------------------------------------------------------------------
@@ -184,7 +200,7 @@ class Altitude(BaseGauge.AbstractBaseGauge):
                 .resize(self._Size) \
                 .set_position('center'),
             needleClip10000 \
-                .resize((self._Size[0]*1.0, self._Size[1]*1.0)) \
+                .resize((self._Size[0]*1.5, self._Size[1]*1.5)) \
                 .set_position('center'),
             needleClip1000 \
                 .resize((self._Size[0]*1.5, self._Size[1]*1.5)) \
@@ -212,6 +228,7 @@ class Altitude(BaseGauge.AbstractBaseGauge):
         # Compose clips and export.
         final_video = mpy.CompositeVideoClip(composition)
         return final_video
+
 
     # -------------------------------------------------------------------------
     # - Digital speeds                                                        -

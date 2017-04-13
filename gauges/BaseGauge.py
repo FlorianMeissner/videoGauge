@@ -342,7 +342,7 @@ class AbstractBaseGauge(object):
                     v['duration'],
                     needleImg
                 )
-                getattr(self,needleList).append(rotImg)
+                getattr(self, needleList).append(rotImg)
 
 
     def setNeedle(self, path=None, filename="needle.png", var="BaseNeedle"):
