@@ -61,10 +61,18 @@ class Altitude(BaseGauge.AbstractBaseGauge):
         self._Altitudes =   []          # List with altitudes from track point
                                         # list. Populated by self.__convert().
         self._WpInst    =   wpInst      # Instance of waypoint class.
+        self._Needle10000 = []
+        self._Needle1000 = []
+        self._Needle100 = []
 
         # Base class constructor
         super(self.__class__, self).__init__()
 
+        # Initializing methods
+        self.setNeedle(filename='needle10000.png', var="BaseNeedle10000")
+        self.setNeedle(filename='needle1000.png', var="BaseNeedle1000")
+        self.setNeedle(filename='needle100.png', var="BaseNeedle100")
+        self.setFaceplate()
 
         # If autorun is enabled, video animation will be written to disk
         # immediately after gathering all data.
@@ -117,8 +125,6 @@ class Altitude(BaseGauge.AbstractBaseGauge):
                 self._Altitudes[key]['angleTo100'] = \
                     self._calibration(altSplit[2])
 
-            #~ print self._Altitudes[key]
-
 
     # -------------------------------------------------------------------------
     # - Composition                                                           -
@@ -129,9 +135,36 @@ class Altitude(BaseGauge.AbstractBaseGauge):
         Create final video clip.
         """
 
-        """
         # Create needles
-        self._rotate_needle(self._Altitudes)
+        tenthousend = []
+        thousend = []
+        hundret = []
+        for alt in self._Altitudes:
+            tenthousend.append(
+                {
+                    'duration'  : alt['duration'],
+                    'angleFrom' : alt['angleFrom10000'],
+                    'angleTo'   : alt['angleTo10000']
+                }
+            )
+            thousend.append(
+                {
+                    'duration'  : alt['duration'],
+                    'angleFrom' : alt['angleFrom1000'],
+                    'angleTo'   : alt['angleTo1000']
+                }
+            )
+            hundret.append(
+                {
+                    'duration'  : alt['duration'],
+                    'angleFrom' : alt['angleFrom100'],
+                    'angleTo'   : alt['angleTo100']
+                }
+            )
+        self._rotate_needle(tenthousend, "_Needle10000", "BaseNeedle10000")
+        self._rotate_needle(thousend, "_Needle1000", "BaseNeedle1000")
+        self._rotate_needle(hundret, "_Needle100", "BaseNeedle100")
+        """
         self._concate_needles()
 
         # Create faceplate

@@ -160,15 +160,22 @@ class AbstractBaseGauge(object):
             self._FaceplateClip.set_duration(self._WpInst.getDuration())
 
 
-    def setFaceplate(self, path):
+    def setFaceplate(self, path=None, filename='faceplate.png', \
+        var="_FaceplateImage"):
+
         """
         Define image containing the faceplate.
         """
 
-        self._FaceplateImage = path
+        if path is None:
+            path = self._PathPrefix
+
+        pathComplete = path + filename
+
+        setattr(self, var, pathComplete)
 
         # Get image size.
-        with Image.open(path) as im:
+        with Image.open(pathComplete) as im:
             self._Size = im.size
 
 
@@ -185,9 +192,7 @@ class AbstractBaseGauge(object):
         unit = self._Unit
 
         # Set pathes for graphics
-        prefix = self.BASEPATH + self._Child.lower() + "/" + unit + "_"
-        self.setNeedle(prefix + "needle.png")
-        self.setFaceplate(prefix + "faceplate.png")
+        self._PathPrefix = self.BASEPATH + self._Child.lower() + "/" + unit + "_"
 
         # Get calibration table.
         # self.calibrator will hold the imported module named like the passed
@@ -243,7 +248,7 @@ class AbstractBaseGauge(object):
     # - Needle                                                                -
     # -------------------------------------------------------------------------
 
-    def __animateNeedleRotation(self, aFrom, aTo, dur):
+    def __animateNeedleRotation(self, aFrom, aTo, dur, needleImg):
         """
         Animate rotation of the needle over a given timeframe. This method
         should only be called from s_rotate_needle(). It wrties the rusulting
@@ -251,7 +256,8 @@ class AbstractBaseGauge(object):
         """
 
         # Get base needle instance and set duration for animation.
-        baseNeedle = self.BaseNeedle.set_duration(dur)
+        #~ baseNeedle = self.BaseNeedle.set_duration(dur)
+        baseNeedle = getattr(self, needleImg).set_duration(dur)
 
         # Calculate rotation angle. (Way to go)
         # Calculation is valid for 1 sec. So divide by duration of animation.
@@ -263,12 +269,7 @@ class AbstractBaseGauge(object):
         aFrom = aFrom * -1
 
         # Rotate needle
-        # For clockwise rotation use negative values.
-        self._Needles.append(
-            baseNeedle.rotate(
-                lambda t: aFrom+t*delta
-            )
-        )
+        return baseNeedle.rotate(lambda t: aFrom+t*delta)
 
 
     def _calibration(self, value, calFunc='calibration'):
@@ -329,7 +330,7 @@ class AbstractBaseGauge(object):
         )
 
 
-    def _rotate_needle(self, values):
+    def _rotate_needle(self, values, needleList="_Needles", needleImg="BaseNeedle"):
         """
         Rotate needle image by given angle of track point.
         This function does the preamptive work for the rotation.
@@ -337,20 +338,25 @@ class AbstractBaseGauge(object):
 
         for v in values:
             if v['duration'] > 0:
-                self.__animateNeedleRotation(
+                rotImg = self.__animateNeedleRotation(
                     v['angleFrom'],
                     v['angleTo'],
-                    v['duration']
+                    v['duration'],
+                    needleImg
                 )
+                getattr(self,needleList).append(rotImg)
 
 
-    def setNeedle(self, path):
+    def setNeedle(self, path=None, filename="needle.png", var="BaseNeedle"):
         """
         Set base image containing the needle and convert it to be processed
         further.
         """
 
-        self.BaseNeedle = mpy.ImageClip(path)
+        if path is None:
+            path = self._PathPrefix
+
+        setattr(self, var, mpy.ImageClip(path+filename))
 
 
 #EOF

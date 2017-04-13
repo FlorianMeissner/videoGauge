@@ -74,6 +74,9 @@ class Airspeed(BaseGauge.AbstractBaseGauge):
         # Base class constructor
         super(self.__class__, self).__init__()
 
+        # Initializing methods
+        self.setNeedle()
+        self.setFaceplate()
 
         # If autorun is enabled, video animation will be written to disk
         # immediately after gathering all data.
