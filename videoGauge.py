@@ -557,11 +557,11 @@ class VideoGauge(object):
         h += "                  [--airspeed-position POSXxPOSY]\n"
         h += "                  [--airspeed-background HEXRGB]\n"
         h += "                  [--airspeed-outputfile FILE]\n"
-        #~ h += "                  [--altitude UNIT]\n"
-        #~ h += "                  [--altitude-size WIDTHxHEIGHT]\n"
-        #~ h += "                  [--altitude-position POSXxPOSY]\n"
-        #~ h += "                  [--altitude-background HEXRGB]\n"
-        #~ h += "                  [--altitude-outputfile FILE]\n"
+        h += "                  [--altitude UNIT]\n"
+        h += "                  [--altitude-size WIDTHxHEIGHT]\n"
+        h += "                  [--altitude-position POSXxPOSY]\n"
+        h += "                  [--altitude-background HEXRGB]\n"
+        h += "                  [--altitude-outputfile FILE]\n"
         #~ h += "                  [--attitude]\n"
         #~ h += "                  [--attitude-size WIDTHxHEIGHT]\n"
         #~ h += "                  [--attitude-position POSXxPOSY]\n"
@@ -592,6 +592,7 @@ class VideoGauge(object):
         #~ h += "                  [--vsi-position POSXxPOSY]\n"
         #~ h += "                  [--vsi-background HEXRGB]\n"
         #~ h += "                  [--vsi-outputfile FILE]\n"
+
         h += "\n"
         h += "Control arguments:\n"
         h += linewrapper("-h | --help",
@@ -612,6 +613,7 @@ class VideoGauge(object):
             "Verbose mode. Shows tables with parsed waypointsfrom GPX file.")
         h += linewrapper("-q",
             "Quiet mode. Reduces output to a minimum. Implies -f.")
+
         h += "\n"
         h += "Airspeed indicator:\n"
         h += linewrapper("--airspeed UNIT",
@@ -627,78 +629,137 @@ class VideoGauge(object):
             "Define background color as HTML RGB hex code. DEFAULT: %s" %
             self.params['airspeed']['bg'])
         h += linewrapper("--airspeed-outputfile FILE",
-            "Specify a filename for the output file. The file will be saved relative to the path specified in --outputfolder. File extension must be *.mp4.")
-        """
+            "Specify a filename for the output file. The file will be saved \
+            relative to the path specified in --outputfolder. File extension \
+            must be *.mp4.")
+
+        h += "\n"
+        h += "Altitude indicator:\n"
         h += linewrapper("--altitude UNIT",
-            "")
+            "Altimeter will only be shown if argument is passed. \
+            UNIT can be either of ft, m.")
         h += linewrapper("--altitude-size WIDTHxHEIGHT",
-            "")
+            "Define size of alitmeter in pixels. DEFAULT: %s" %
+            self.params['altitude']['size'])
         h += linewrapper("--altitude-position POSXxPOSY",
-            "")
+            "Define position of gauge in video. DEFAULT: %s" %
+            self.params['altitude']['position'])
         h += linewrapper("--altitude-background HEXRGB",
-            "")
+            "Define background color as HTML RGB hex code. DEFAULT: %s" %
+            self.params['altitude']['bg'])
         h += linewrapper("--altitude-outputfile FILE",
-            "")
+            "Specify a filename for the output file. The file will be saved \
+            relative to the path specified in --outputfolder. File extension \
+            must be *.mp4.")
+
+        """
+        h += "\n"
+        h += "Attitude indicator:\n"
         h += linewrapper("--attitude",
             "")
         h += linewrapper("--attitude-size WIDTHxHEIGHT",
-            "")
+            "Define size of alitmeter in pixels. DEFAULT: %s" %
+            self.params['attitude']['size'])
         h += linewrapper("--attitude-position POSXxPOSY",
-            "")
+            "Define position of gauge in video. DEFAULT: %s" %
+            self.params['attitude']['position'])
         h += linewrapper("--attitude-background HEXRGB",
-            "")
+            "Define background color as HTML RGB hex code. DEFAULT: %s" %
+            self.params['attitude']['bg'])
         h += linewrapper("--attitude-outputfile FILE",
-            "")
+            "Specify a filename for the output file. The file will be saved \
+            relative to the path specified in --outputfolder. File extension \
+            must be *.mp4.")
+
+        h += "\n"
+        h += "Compass:\n"
         h += linewrapper("--compass",
             "")
         h += linewrapper("--compass-size WIDTHxHEIGHT",
-            "")
+            "Define size of alitmeter in pixels. DEFAULT: %s" %
+            self.params['compass']['size'])
         h += linewrapper("--compass-position POSXxPOSY",
-            "")
+            "Define position of gauge in video. DEFAULT: %s" %
+            self.params['compass']['position'])
         h += linewrapper("--compass-background HEXRGB",
-            "")
+            "Define background color as HTML RGB hex code. DEFAULT: %s" %
+            self.params['compass']['bg'])
         h += linewrapper("--compass-outputfile FILE",
-            "")
+            "Specify a filename for the output file. The file will be saved \
+            relative to the path specified in --outputfolder. File extension \
+            must be *.mp4.")
+
+        h += "\n"
+        h += "G-Meter:\n"
         h += linewrapper("--gmeter",
             "")
         h += linewrapper("--gmeter-size WIDTHxHEIGHT",
-            "")
+            "Define size of alitmeter in pixels. DEFAULT: %s" %
+            self.params['gmeter']['size'])
         h += linewrapper("--gmeter-position POSXxPOSY",
-            "")
+            "Define position of gauge in video. DEFAULT: %s" %
+            self.params['gmeter']['position'])
         h += linewrapper("--gmeter-background HEXRGB",
-            "")
+            "Define background color as HTML RGB hex code. DEFAULT: %s" %
+            self.params['gmeter']['bg'])
         h += linewrapper("--gmeter-outputfile FILE",
-            "")
+            "Specify a filename for the output file. The file will be saved \
+            relative to the path specified in --outputfolder. File extension \
+            must be *.mp4.")
+
+        h += "\n"
+        h += "Gyro:\n"
         h += linewrapper("--gyro",
             "")
         h += linewrapper("--gyro-size WIDTHxHEIGHT",
-            "")
+            "Define size of alitmeter in pixels. DEFAULT: %s" %
+            self.params['gyro']['size'])
         h += linewrapper("--gyro-position POSXxPOSY",
-            "")
+            "Define position of gauge in video. DEFAULT: %s" %
+            self.params['gyro']['position'])
         h += linewrapper("--gyro-background HEXRGB",
-            "")
+            "Define background color as HTML RGB hex code. DEFAULT: %s" %
+            self.params['gyro']['bg'])
         h += linewrapper("--gyro-outputfile FILE",
-            "")
+            "Specify a filename for the output file. The file will be saved \
+            relative to the path specified in --outputfolder. File extension \
+            must be *.mp4.")
+
+        h += "\n"
+        h += "RPM indicator:\n"
         h += linewrapper("--rpm",
             "")
         h += linewrapper("--rpm-size WIDTHxHEIGHT",
-            "")
+            "Define size of alitmeter in pixels. DEFAULT: %s" %
+            self.params['rpm']['size'])
         h += linewrapper("--rpm-position POSXxPOSY",
-            "")
+            "Define position of gauge in video. DEFAULT: %s" %
+            self.params['rpm']['position'])
         h += linewrapper("--rpm-background HEXRGB",
-            "")
+            "Define background color as HTML RGB hex code. DEFAULT: %s" %
+            self.params['rpm']['bg'])
         h += linewrapper("--rpm-outputfile FILE",
-            "")
+            "Specify a filename for the output file. The file will be saved \
+            relative to the path specified in --outputfolder. File extension \
+            must be *.mp4.")
+
+        h += "\n"
+        h += "Vertical speed indicator:\n"
         h += linewrapper("--vsi UNIT",
             "")
         h += linewrapper("--vsi-size WIDTHxHEIGHT",
-            "")
+            "Define size of alitmeter in pixels. DEFAULT: %s" %
+            self.params['vsi']['size'])
         h += linewrapper("--vsi-position POSXxPOSY",
-            "")
+            "Define position of gauge in video. DEFAULT: %s" %
+            self.params['vsi']['position'])
         h += linewrapper("--vsi-background HEXRGB",
-            "")
+            "Define background color as HTML RGB hex code. DEFAULT: %s" %
+            self.params['vsi']['bg'])
         h += linewrapper("--vsi-outputfile FILE",
-            "")
+            "Specify a filename for the output file. The file will be saved \
+            relative to the path specified in --outputfolder. File extension \
+            must be *.mp4.")
         """
 
         if self.params["displayHelp"]:
@@ -785,7 +846,29 @@ class VideoGauge(object):
         Handle class operation for altitude indicator.
         """
 
-        log.warning("Altitude indicator will be added later!")
+        params = self.params['altitude']
+        gauge = gauges.Altitude.Altitude(
+            wpInst=self._wp,
+            unit=params['unit'],
+            digSpeed=False,
+            autorun=False,
+            settings=self.VIDEOSETTINGS
+        )
+
+        gauge.setSize(xy=params['size'])
+        gauge.setPosition(xy=params['position'])
+
+
+        clip = gauge.make()
+
+        filename  = self.params['outputfolder']
+        filename += "altitude"
+        filename += self.VIDEOSETTINGS['filetype']
+
+        #~ try:
+            #~ gauge.save(clip, filename, force=self.params['force'])
+        #~ except IOError, e:
+            #~ self.__exit(e, True)
 
 
     def _attitude(self):
@@ -851,7 +934,7 @@ class VideoGauge(object):
         # Create new folder.
         os.mkdir(self.params['outputfolder'])
     '''
-    
+
 
 
 # *****************************************************************************

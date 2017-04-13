@@ -101,17 +101,17 @@ class AbstractBaseGauge(object):
 
         self._BgColor = (r, g, b)
 
-        
+
     # -------------------------------------------------------------------------
     # - Composition                                                           -
     # -------------------------------------------------------------------------
-    
-    
+
+
     def save(self, clip, path, settings=None, force=False):
         """
         Save compiled video to disk.
         """
-        
+
         if os.path.isdir(path):
             raise IOError(
                 "'%s' is a directory. We can't overwrite directories with files!"
@@ -143,7 +143,7 @@ class AbstractBaseGauge(object):
                              audio=settings['audio'],
                              threads=settings['ffmpeg_threads'],
                              preset=settings['ffmpeg_preset'])
-        
+
 
     # -------------------------------------------------------------------------
     # - Faceplate                                                             -
@@ -185,7 +185,7 @@ class AbstractBaseGauge(object):
         unit = self._Unit
 
         # Set pathes for graphics
-        prefix = self.BASEPATH + "airspeed/" + unit + "_"
+        prefix = self.BASEPATH + self._Child.lower() + "/" + unit + "_"
         self.setNeedle(prefix + "needle.png")
         self.setFaceplate(prefix + "faceplate.png")
 

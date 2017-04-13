@@ -37,6 +37,7 @@
 ###################################################################################################
 
 
+from math                   import floor
 import os
 
 
@@ -81,6 +82,20 @@ def lookahead(iterable):
 
     # Report last value.
     yield last
+
+
+def splitPower(number):
+    """
+    Splits a given number into powers of 10.
+    """
+
+    number = float(number)
+    tenthousend = number / 10000
+    thousend = (number - floor(tenthousend) * 10000) / 1000
+    hundret = (number - floor(tenthousend) * 10000 - \
+        floor(thousend) * 1000) / 100
+
+    return (tenthousend, thousend, hundret)
 
 
 # EOF

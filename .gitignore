@@ -1,7 +1,7 @@
 /videoGauge.geany
 /A Raspberry Pi-Based Attitude Sensor.pdf
-/Gauges/
 *.pyc
 *Kopie*
 *test*
 *.mp4
+/compile.sh
