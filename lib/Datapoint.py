@@ -612,7 +612,7 @@ class WP(object):
             line.append("%4.1f" % wp['speed'])
             #line.append(str(wp['time']))
             line.append("%s" % wp['timestamp'])
-            
+
             """
             if isinstance(wp['lowerNeighbour'], str):
                 lNb = wp['lowerNeighbour'][0]
@@ -624,7 +624,7 @@ class WP(object):
             else:
                 hNb = wp['higherNeighbour']
             """
-            
+
             #line.append("%s, %s" % (lNb, hNb))
             line.append("%s" % wp['duration'])
             line.append("%4.1f" % wp['heading'])
@@ -638,24 +638,27 @@ class WP(object):
                 else:
                     g += "%s, " % value
             line.append(g[:-2])
+
+            line.append("%s" % wp['qnh'])
             return line
 
         # Prepare table head
         rows = []
         rows.append(
             [
-                'Lat', 
-                'Lon', 
-                'Alt', 
-                'Spd', 
-                #'Time', 
-                'Ts', 
-                #'Nb', 
-                'Dur', 
-                'HDG', 
-                'Dist', 
-                'vsi', 
-                'G'
+                'Lat',
+                'Lon',
+                'Alt',
+                'Spd',
+                #'Time',
+                'Ts',
+                #'Nb',
+                'Dur',
+                'HDG',
+                'Dist',
+                'vsi',
+                'G',
+                'QNH'
             ]
         )
 
@@ -704,6 +707,7 @@ class WP(object):
 
         else:
             func = "%s2%s" % (default_unit, targetUnit)
+            print value
             exec("value = lib.calculations.av_conv.%s(value)" % func)
             return value
 

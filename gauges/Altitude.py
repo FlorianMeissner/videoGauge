@@ -71,6 +71,7 @@ class Altitude(BaseGauge.AbstractBaseGauge):
         self.setNeedle(filename='needle1000.png', var="BaseNeedle1000")
         self.setNeedle(filename='needle100.png', var="BaseNeedle100")
         self.setFaceplate()
+        self.setFaceplate(filename="qnh.png", var="_QnhImage")
 
         # If autorun is enabled, video animation will be written to disk
         # immediately after gathering all data.
@@ -115,6 +116,8 @@ class Altitude(BaseGauge.AbstractBaseGauge):
 
             self._Altitudes[key]['angleFrom100'] = \
                 self.__calibrator(altSplit[5], altSplit[2])
+
+            #~ self._Altitudes[key]['qnhFrom'] = self.calibration()
 
             if isinstance(wp['higherNeighbour'], int):
                 altSplitHN = \
@@ -191,12 +194,18 @@ class Altitude(BaseGauge.AbstractBaseGauge):
         # Create faceplate
         faceplateClip = self._create_faceplate_clip()
 
+        # QNH clip
+        qnhClip = self._create_faceplate_clip("_QnhImage")
+
         # Create background.
         bgClip = self._create_background()
 
         # Create gauge clip without background at first because otherwise needle
         # will be moved out of center of faceplate.
         gaugeclip = [
+            qnhClip \
+                .resize(self._Size) \
+                .set_position('center'),
             faceplateClip \
                 .resize(self._Size) \
                 .set_position('center'),
