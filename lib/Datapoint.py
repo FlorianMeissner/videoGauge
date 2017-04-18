@@ -38,13 +38,13 @@
 
 
 # own libraries
-from lib.calculations.navigation import getBearing, getDistance
+from lib.calculations.navigation    import getBearing, getDistance
 import lib.calculations.av_conv
 
 # foreign libraries
-from datetime import datetime
-from operator import itemgetter
-from terminaltables import AsciiTable as Table
+from datetime                       import datetime
+from operator                       import itemgetter
+from terminaltables                 import AsciiTable   as Table
 import logging
 
 
@@ -297,6 +297,17 @@ class WP(object):
         # Perfom gap filling calculations.
         self.__listOrdered = False
         self.__listCalculated = False
+        #~ self.__calculate()
+
+
+    def calculator(self):
+        """
+        Perform calculations to get more displayable values.
+        """
+
+        #~ self.__printAll()
+        self.__listOrdered = False
+        self.__listCalculated = False
         self.__calculate()
 
 
@@ -495,7 +506,7 @@ class WP(object):
         # Perfom gap filling calculations.
         self.__listOrdered = False
         self.__listCalculated = False
-        self.__calculate()
+        #~ self.__calculate()
 
 
     def getAllByField(self, fields, units=None):
@@ -567,7 +578,7 @@ class WP(object):
         return len(self.WPlist)
 
 
-    def getWP(self, identifier, ident_type, ident_mode="nearest"):
+    def getWP(self, identifier, ident_type, ident_mode="absolute"):
         """
         Return a Waypoint by a given identifier and identification mode.
         ident_type can be "index" or "time".
@@ -584,8 +595,14 @@ class WP(object):
             return self.WPlist[identifier]
 
         elif ident_type == "time":
+
+            # Iterate through WPlist an return index number when times match.
             if ident_mode == "absolute":
-                pass
+                for wp in self.WPlist:
+                    if wp['time'] == identifier:
+                        return self.WPlist.index(wp)
+                return None     # Termination if time was not found.
+
             elif ident_mode == "nearest":
                 pass
             else:
@@ -884,7 +901,16 @@ class WP(object):
             else:
                 mySpeed = wp['speed']
                 nextSpeed = self.getWP(wp['higherNeighbour'], 'index')['speed']
+                #~ try:
+                    #~ if nextSpeed is None:
+                        #~ a = None
+                    #~ else:
                 a = (nextSpeed - mySpeed) / wp['duration']**2
+                #~ except BaseException, e:
+                    #~ print e
+                    #~ print wp, self.getWP(wp['higherNeighbour'], 'index')
+                    #~ sys.exit(2)
+                    #~ a = None
 
             if wp['g']['x'] != a:
                 return ('g', {'x':a, 'y':None, 'z':None})
@@ -1025,6 +1051,12 @@ class WP(object):
 
         self.WPlist = sorted(self.WPlist, key=itemgetter(param))
         self.__listOrdered = True
+
+
+    def __printAll(self):
+
+        for wp in self.WPlist:
+            print wp
 
 
     def __videoTimestamp(self):

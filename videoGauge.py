@@ -63,6 +63,7 @@ from lib.myMisc                 import basePath
 from lib.terminalSize           import getTerminalSize
 
 # Foreign libraries
+from datetime                   import datetime
 from time                       import time
 import getopt
 import gpxpy
@@ -798,16 +799,34 @@ class VideoGauge(object):
                                                     # 1.0.
 
         # Parse tracks.
+        oldTime = datetime(1970, 01, 01, 00, 00, 00, 00)
         for track in gpx.tracks:
             for segment in track.segments:
                 for point in segment.points:
-                    self._wp.addWP(
-                        lat=point.latitude, lat_unit=self._wp.U_DEG, \
-                        lon=point.longitude, lon_unit=self._wp.U_DEG, \
-                        altitude=point.elevation, altitude_unit=self._wp.U_M, \
-                        speed=point.speed, speed_unit=self._wp.U_MS, \
-                        time=point.time
-                    )
+
+                    # Compare timestamp to previous track point. If it's the
+                    # same, just change existing trackpoint.
+                    if oldTime == point.time:
+                        index = self._wp.getWP(point.time, ident_type='time')
+                        self._wp.changeWP(
+                            index, \
+                            lat=point.latitude, lat_unit=self._wp.U_DEG, \
+                            lon=point.longitude, lon_unit=self._wp.U_DEG, \
+                            altitude=point.elevation, altitude_unit=self._wp.U_M, \
+                            speed=point.speed, speed_unit=self._wp.U_MS, \
+                            time=point.time
+                        )
+                    else:
+                        self._wp.addWP(
+                            lat=point.latitude, lat_unit=self._wp.U_DEG, \
+                            lon=point.longitude, lon_unit=self._wp.U_DEG, \
+                            altitude=point.elevation, altitude_unit=self._wp.U_M, \
+                            speed=point.speed, speed_unit=self._wp.U_MS, \
+                            time=point.time
+                        )
+                    oldTime = point.time
+
+        self._wp.calculator()
         self._wp.showWPtable()
 
 
