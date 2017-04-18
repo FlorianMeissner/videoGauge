@@ -707,7 +707,7 @@ class WP(object):
 
         else:
             func = "%s2%s" % (default_unit, targetUnit)
-            print value
+            #~ print value
             exec("value = lib.calculations.av_conv.%s(value)" % func)
             return value
 

@@ -63,6 +63,7 @@ from lib.myMisc                 import basePath
 from lib.terminalSize           import getTerminalSize
 
 # Foreign libraries
+from time                       import time
 import getopt
 import gpxpy
 import logging                  as log
@@ -76,6 +77,7 @@ class VideoGauge(object):
     def __init__(self):
 
         # Constants
+        self.STARTTIME = time()
         self.VIDEOSETTINGS = {
                                 "codec"             :   "mpeg4",
                                 "filetype"          :   ".mp4",
@@ -118,6 +120,9 @@ class VideoGauge(object):
             sys.exit(2)
         else:
             log.info(msg)
+            endtime = time()
+            elapsed = endtime - self.STARTTIME
+            log.info("Elapsed time: %1.2f sec." % elapsed)
             sys.exit(0)
 
 
