@@ -64,6 +64,7 @@ from lib.terminalSize           import getTerminalSize
 
 # Foreign libraries
 from datetime                   import datetime
+from math                       import floor
 from time                       import time
 import getopt
 import gpxpy
@@ -121,9 +122,7 @@ class VideoGauge(object):
             sys.exit(2)
         else:
             log.info(msg)
-            endtime = time()
-            elapsed = endtime - self.STARTTIME
-            log.info("Elapsed time: %1.2f sec." % elapsed)
+            self.__runningTime()
             sys.exit(0)
 
 
@@ -138,6 +137,31 @@ class VideoGauge(object):
         self.logger.addHandler(self.logHandler)
         self._setLogLevel()
         self._setLogFormat()
+
+
+    def __runningTime(self):
+        """
+        Calculate running time of application.
+        """
+
+        endtime = time()
+        elapsed = endtime - self.STARTTIME
+        hours = floor(elapsed / 3600)
+        minutes = floor((elapsed - hours * 3600) / 60)
+        seconds = elapsed - hours * 3600 - minutes * 60
+
+        msg = "Elapsed time: "
+        end = " sec"
+        if hours > 0:
+            msg += "%02d:" % hours
+            msg += "%02d:" % minutes
+            end = " h"
+        if minutes > 0 and hours == 0:
+            msg += "%02d:" % minutes
+            end = " min"
+        msg += "%1.2f" % seconds
+        msg += end
+        log.info(msg)
 
 
     def _setLogFormat(self, fmt="DEFAULT"):
